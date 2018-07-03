@@ -4,49 +4,50 @@ import dikanev.nikita.bot.controller.commands.CommandController;
 import dikanev.nikita.bot.model.callback.CommandResponse;
 import dikanev.nikita.bot.model.callback.VkCommands;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class HomeCommand extends VkCommand {
 
     @Override
-    public CommandResponse init(CommandResponse cmdResponse) throws Exception {
-        sendMessage("Вы в главном меню", cmdResponse.getIdUser(), true);
+    public CommandResponse init(CommandResponse cmdResp) throws Exception {
+        sendMessage("Вы в главном меню", cmdResp.getIdUser(), true);
 
-        return cmdResponse.setArgs("").finish();
+        return cmdResp.setArgs("").finish();
     }
 
     @Override
-    public CommandResponse handle(CommandResponse cmdResponse) throws Exception {
-        if (!cmdResponse.getArgs().equals("")) {
-            cmdResponse.setArgs("");
+    public CommandResponse handle(CommandResponse cmdResp) throws Exception {
+        if (!cmdResp.getArgs().equals("")) {
+            cmdResp.setArgs("");
         }
 
-        String[] args = cmdResponse.getMessage().getBody().split(" ");
+        String[] args = cmdResp.getMessage().getBody().split(" ");
         String command = args[0];
 
         switch (command) {
             case "help":
-                return cmdResponse.setIdCommand(VkCommands.HELP.id()).setInit();
+                return cmdResp.setIdCommand(VkCommands.HELP.id()).setInit();
 
             case "callback":
-                return cmdResponse.setIdCommand(VkCommands.CALLBACK_TEST.id())
-                        .setText(cmdResponse.getMessage().getBody().substring(command.length()));
+                return cmdResp.setIdCommand(VkCommands.CALLBACK_TEST.id())
+                        .setText(cmdResp.getMessage().getBody().substring(command.length()));
 
             case "create":
                 if (args.length > 1 && args[1].equals("user")) {
-                    return cmdResponse.setIdCommand(VkCommands.CREATE_USER.id())
-                            .setText(cmdResponse.getMessage().getBody().substring("create user".length())).setHandle();
+                    return cmdResp.setIdCommand(VkCommands.CREATE_USER.id())
+                            .setText(cmdResp.getMessage().getBody().substring("create user".length())).setHandle();
                 }
 
             case "find":
                 if (args.length > 1 && args[1].equals("user")) {
-                    return cmdResponse.setIdCommand(VkCommands.GET_USER.id())
-                            .setText(cmdResponse.getMessage().getBody().substring("find user".length())).setHandle();
+                    return cmdResp.setIdCommand(VkCommands.GET_USER.id())
+                            .setText(cmdResp.getMessage().getBody().substring("find user".length())).setHandle();
                 }
 
             default:
-                sendMessage("Неизвестная команда\nВведите help, чтобы увидеть список команд", cmdResponse.getIdUser());
-                return cmdResponse.finish();
+                sendMessage("Неизвестная команда\nВведите help, чтобы увидеть список команд", cmdResp.getIdUser());
+                return cmdResp.finish();
         }
 
     }
@@ -56,12 +57,12 @@ public class HomeCommand extends VkCommand {
     }
 
     @Override
-    public List<TK>[] setDefaultKeyboardButtons() {
-        return new List[]{
+    public List<List<TK>> setDefaultKeyboardButtons() {
+        return new ArrayList<>(List.of(
                 List.of(VkCommand.TK.getDefault("create user")),
                 List.of(VkCommand.TK.getDefault("find user")),
                 List.of(VkCommand.TK.getDefault("callback")),
                 List.of(VkCommand.TK.getDefault("help"))
-        };
+        ));
     }
 }

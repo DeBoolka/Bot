@@ -10,18 +10,18 @@ import java.util.Random;
 public class HelpCommand extends VkCommand {
 
     @Override
-    public CommandResponse init(CommandResponse commandResponse) throws Exception {
+    public CommandResponse init(CommandResponse cmdResp) throws Exception {
         sendMessage("Справка по командам\n" +
                         "* find user [id]\t-\tинформация о пользователе\n" +
                         "* callback\t-\tпроверка работоспособности обработки аргументов\n" +
                         "* create user -i [id группы] -g [id группы] -n [имя] -s [фамилия]\t-\tсоздание нового пользователя\n" +
                         "* help\t-\tсправка по командам"
-                , commandResponse.getIdUser());
+                , cmdResp.getIdUser());
 
-        return commandResponse.setIdCommand(VkCommands.HOME.id()).finish();
+        return cmdResp.setIdCommand(VkCommands.HOME.id()).finish();
     }
 
     @Override
-    public CommandResponse handle(CommandResponse commandResponse) throws Exception {
-        return commandResponse.setIdCommand(VkCommands.HOME.id()).finish();    }
+    public CommandResponse handle(CommandResponse cmdResp) throws Exception {
+        return cmdResp.setIdCommand(VkCommands.HOME.id()).finish();    }
 }

@@ -14,14 +14,14 @@ import java.util.Map;
 public class CreateUserCommand extends VkCommand {
 
     @Override
-    public CommandResponse init(CommandResponse cmdResponse) throws Exception {
-        if (cmdResponse.getMessage() != null
-                && cmdResponse.getMessage().getBody().toLowerCase().equals("menu")) {
-            sendMessage("Вы переходите в главное меню", cmdResponse.getIdUser());
-            return cmdResponse.setIdCommand(VkCommands.HOME.id()).finish();
+    public CommandResponse init(CommandResponse cmdResp) throws Exception {
+        if (cmdResp.getMessage() != null
+                && cmdResp.getMessage().getBody().toLowerCase().equals("menu")) {
+            sendMessage("Вы переходите в главное меню", cmdResp.getIdUser());
+            return cmdResp.setIdCommand(VkCommands.HOME.id()).finish();
         }
 
-        Map<String, String> argsMap = getUrlParametr(cmdResponse.getArgs());
+        Map<String, String> argsMap = getUrlParametr(cmdResp.getArgs());
         StringBuilder resp = new StringBuilder();
         int indexArg = 0;
 
@@ -41,31 +41,31 @@ public class CreateUserCommand extends VkCommand {
         boolean createUserDefGroup = false;
         if (indexArg == 1 && !argsMap.containsKey("id_group")) {
             if (!argsMap.containsKey("default_group")) {
-                sendMessage("Хотите создать пользователя с группой по умолчанию?", cmdResponse.getIdUser());
+                sendMessage("Хотите создать пользователя с группой по умолчанию?", cmdResp.getIdUser());
                 argsMap.put("default_group", "true");
-                return cmdResponse.setArgs(mapToGetString(argsMap)).finish();
+                return cmdResp.setArgs(mapToGetString(argsMap)).finish();
             } else if (!argsMap.get("default_group").equals("true")) {
-                sendMessage("Введите id группы", cmdResponse.getIdUser());
-                return cmdResponse.finish();
+                sendMessage("Введите id группы", cmdResp.getIdUser());
+                return cmdResp.finish();
             }
             createUserDefGroup = true;
         } else if (indexArg > 0) {
             sendMessage("Введите:\n" + resp.toString() +
                             "\nДля выхода в меню воспользуйтесь командой \"menu\"\n"
-                    , cmdResponse.getIdUser());
-            return cmdResponse.finish();
+                    , cmdResp.getIdUser());
+            return cmdResp.finish();
         }
 
         try {
             UserObject user;
             if (createUserDefGroup) {
                 user = UserController.getInstance().createUser(
-                        UserController.getInstance().getToken(cmdResponse.getIdUser())
+                        UserController.getInstance().getToken(cmdResp.getIdUser())
                         , Integer.valueOf(argsMap.get("id_user")), argsMap.get("name"), argsMap.get("s_name")
                 );
             } else {
                 user = UserController.getInstance().createUser(
-                        UserController.getInstance().getToken(cmdResponse.getIdUser()), Integer.valueOf(argsMap.get("id_user")),
+                        UserController.getInstance().getToken(cmdResp.getIdUser()), Integer.valueOf(argsMap.get("id_user")),
                         Integer.valueOf(argsMap.get("id_group")), argsMap.get("name"), argsMap.get("s_name")
                 );
             }
@@ -75,35 +75,35 @@ public class CreateUserCommand extends VkCommand {
                             "\nId группы: " + user.getIdGroup() +
                             "\nИмя: " + user.getName() +
                             "\nФамилия: " + user.getsName()
-                    , cmdResponse.getIdUser()
+                    , cmdResp.getIdUser()
             );
         } catch (NoAccessException e) {
-            sendMessage("У вас нет доступа к данной комнде!" + resp.toString(), cmdResponse.getIdUser());
+            sendMessage("У вас нет доступа к данной комнде!" + resp.toString(), cmdResp.getIdUser());
         } catch (SQLException | NumberFormatException | ApiException e) {
             sendMessage("Ошибка при создании пользователя.\n" +
-                    "Проверьте правильность введенных данных и попробуйте еще раз.", cmdResponse.getIdUser());
-            return cmdResponse.finish();
+                    "Проверьте правильность введенных данных и попробуйте еще раз.", cmdResp.getIdUser());
+            return cmdResp.finish();
         }
 
-        return cmdResponse.setIdCommand(VkCommands.HOME.id()).setInit();
+        return cmdResp.setIdCommand(VkCommands.HOME.id()).setInit();
     }
 
     @Override
-    public CommandResponse handle(CommandResponse commandResponse) throws Exception {
-        List<String> args = List.of(commandResponse.getText().split(" "));
-        Map<String, String> argsMap = getUrlParametr(commandResponse.getArgs());
+    public CommandResponse handle(CommandResponse cmdResp) throws Exception {
+        List<String> args = List.of(cmdResp.getText().split(" "));
+        Map<String, String> argsMap = getUrlParametr(cmdResp.getArgs());
 
         if (argsMap.containsKey("default_group")) {
             String defGroup = argsMap.get("default_group");
-            if (defGroup.equals("true") && !isTrue(commandResponse.getText())) {
+            if (defGroup.equals("true") && !isTrue(cmdResp.getText())) {
                 argsMap.put("default_group", "false");
-                return commandResponse.setArgs(mapToGetString(argsMap)).setInit();
+                return cmdResp.setArgs(mapToGetString(argsMap)).setInit();
             } else if (defGroup.equals("true")) {
-                return commandResponse.setInit();
+                return cmdResp.setInit();
             }
 
-            argsMap.put("id_group", commandResponse.getText());
-            return commandResponse.setArgs(mapToGetString(argsMap)).setInit();
+            argsMap.put("id_group", cmdResp.getText());
+            return cmdResp.setArgs(mapToGetString(argsMap)).setInit();
         }
 
         int findIndex = -1;
@@ -133,7 +133,7 @@ public class CreateUserCommand extends VkCommand {
             }
         }
 
-        commandResponse.setArgs(mapToGetString(argsMap));
-        return commandResponse.setIdCommand(VkCommands.CREATE_USER.id()).setInit();
+        cmdResp.setArgs(mapToGetString(argsMap));
+        return cmdResp.setIdCommand(VkCommands.CREATE_USER.id()).setInit();
     }
 }

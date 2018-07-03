@@ -1,6 +1,7 @@
 package dikanev.nikita.bot.controller.users;
 
 import dikanev.nikita.bot.api.exceptions.ApiException;
+import dikanev.nikita.bot.api.exceptions.InvalidParametersException;
 import dikanev.nikita.bot.api.objects.UserObject;
 import dikanev.nikita.bot.controller.db.users.UserDBController;
 import org.slf4j.Logger;
@@ -55,6 +56,12 @@ public class UserController {
     //Удалить токен
     private boolean deleteFromGraph(int idUser) throws SQLException {
         return UserDBController.getInstance().deleteFromGraph(idUser);
+    }
+
+    //Применение инвайта от другого пользователя
+    public UserObject inInvite(int idUser, String invite) throws InvalidParametersException {
+        //todo: Сделать ввод инвайт кода
+        return null;
     }
 
     //Получение хеша строки

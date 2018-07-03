@@ -22,15 +22,15 @@ public abstract class VkCommand {
 
     private boolean isOneTime = true;
 
-    private List<TK>[] buttons = null;
+    private List<List<TK>> buttons = null;
 
     public VkCommand() {
         buttons = setDefaultKeyboardButtons();
     }
 
-    public abstract CommandResponse init(CommandResponse commandResponse) throws Exception;
+    public abstract CommandResponse init(CommandResponse cmdResp) throws Exception;
 
-    public abstract CommandResponse handle(CommandResponse commandResponse) throws Exception;
+    public abstract CommandResponse handle(CommandResponse cmdResp) throws Exception;
 
     public static void sendMessage(String msg, int vkId) throws ClientException, ApiException{
         VkClientStorage.getInstance().vk().messages()
@@ -54,8 +54,9 @@ public abstract class VkCommand {
                 .peerId(vkId).execute();
     }
 
-    public static void sendMessage(String msg, int vkId, boolean one_time, List<List<String>> buttons) throws ClientException, ApiException {
-        JsonArray columnButton = new JsonArray();
+    public static void sendMessage(String msg, int vkId, boolean one_time, List<List<TK>> buttons) throws ClientException, ApiException {
+        sendMessage(msg, vkId, one_time, (List<TK>[]) buttons.toArray());
+        /*JsonArray columnButton = new JsonArray();
         buttons.forEach(c -> {
             JsonArray rowButton = new JsonArray();
             c.forEach(r -> {
@@ -87,10 +88,10 @@ public abstract class VkCommand {
                 .randomId(new Random().nextInt(10000))
                 .message(msg)
                 .unsafeParam("keyboard", messageObject)
-                .peerId(vkId).execute();
+                .peerId(vkId).execute();*/
     }
 
-    public static void sendMessage(String msg, int vkId, List<List<String>> buttons) throws ClientException, ApiException {
+    public static void sendMessage(String msg, int vkId, List<List<TK>> buttons) throws ClientException, ApiException {
         sendMessage(msg, vkId, false, buttons);
     }
 
@@ -131,7 +132,7 @@ public abstract class VkCommand {
     }
 
     public static Map<String, String> getUrlParametr(String query) throws UnsupportedEncodingException {
-        final Map<String, String> query_pairs = new LinkedHashMap<>();
+        final Map<String, String> query_pairs = new HashMap<>();
         final String[] pairs = query.split("&");
         for (String pair : pairs) {
             final int idx = pair.indexOf("=");
@@ -180,7 +181,7 @@ public abstract class VkCommand {
         }
     }
 
-    public List<TK>[] setDefaultKeyboardButtons() {
+    public List<List<TK>> setDefaultKeyboardButtons() {
         return null;
     }
 

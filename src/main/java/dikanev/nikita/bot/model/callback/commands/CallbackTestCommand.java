@@ -11,24 +11,24 @@ import java.util.Map;
 public class CallbackTestCommand extends VkCommand {
 
     @Override
-    public CommandResponse init(CommandResponse commandResponse) throws Exception {
+    public CommandResponse init(CommandResponse cmdResp) throws Exception {
         sendMessage("Вы в проверке аргументов\n" +
                         "Ввод аргумантов:\n" +
                         "[key1] [value1] [key2] [value2] ...\n" +
                         "Для выхода в меню введите команду \"Меню\""
-                , commandResponse.getIdUser());
+                , cmdResp.getIdUser());
 
-        return commandResponse.setHandle();
+        return cmdResp.setHandle();
     }
 
     @Override
-    public CommandResponse handle(CommandResponse commandResponse) throws Exception {
-        if (commandResponse.getText().equals("Меню")) {
-            return commandResponse.setIdCommand(VkCommands.HOME.id()).setInit();
+    public CommandResponse handle(CommandResponse cmdResp) throws Exception {
+        if (cmdResp.getText().equals("Меню")) {
+            return cmdResp.setIdCommand(VkCommands.HOME.id()).setInit();
         }
 
-        Map<String, String> argsMap = getUrlParametr(commandResponse.getArgs());
-        List<String> splitMessage = new ArrayList<>(List.of(commandResponse.getText().split(" ")));
+        Map<String, String> argsMap = getUrlParametr(cmdResp.getArgs());
+        List<String> splitMessage = new ArrayList<>(List.of(cmdResp.getText().split(" ")));
 
         int findIndex;
         if (argsMap.get("name") == null
@@ -48,14 +48,14 @@ public class CallbackTestCommand extends VkCommand {
         }
 
         if (argsMap.get("name") == null) {
-            sendMessage("Введите имя", commandResponse.getIdUser());
+            sendMessage("Введите имя", cmdResp.getIdUser());
         } else if (argsMap.get("s_name") == null) {
-            sendMessage("Введите фамилию", commandResponse.getIdUser());
+            sendMessage("Введите фамилию", cmdResp.getIdUser());
         } else {
             String args = mapToGetString(argsMap);
-            sendMessage("Вот ваши текущие аргументы:\n" + args, commandResponse.getIdUser());
-            sendMessage("Вся информация заполнена\nВы переходите в меню", commandResponse.getIdUser());
-            return commandResponse.setIdCommand(VkCommands.HOME.id()).finish();
+            sendMessage("Вот ваши текущие аргументы:\n" + args, cmdResp.getIdUser());
+            sendMessage("Вся информация заполнена\nВы переходите в меню", cmdResp.getIdUser());
+            return cmdResp.setIdCommand(VkCommands.HOME.id()).finish();
         }
 
         int splitSize = splitMessage.size();
@@ -68,8 +68,8 @@ public class CallbackTestCommand extends VkCommand {
         }
 
         String args = mapToGetString(argsMap);
-        sendMessage("Вот ваши текущие аргументы:\n" + args, commandResponse.getIdUser());
+        sendMessage("Вот ваши текущие аргументы:\n" + args, cmdResp.getIdUser());
 
-        return commandResponse.setIdCommand(VkCommands.CALLBACK_TEST.id()).setArgs(args).finish();
+        return cmdResp.setIdCommand(VkCommands.CALLBACK_TEST.id()).setArgs(args).finish();
     }
 }

@@ -20,18 +20,6 @@ public class MessagesHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(MessagesHandler.class);
 
-    private static Integer parseInt(String[] args, int index, int defaultValue) {
-        if (args.length <= index) {
-            return defaultValue;
-        }
-
-        try {
-            return Integer.parseInt(args[index]);
-        } catch (NumberFormatException e) {
-            return defaultValue;
-        }
-    }
-
     public static void parseMessage(Integer groupId, Message message) {
         try {
             Map<String, Object> currentDataCommand = getCurrentDataCommand(message);

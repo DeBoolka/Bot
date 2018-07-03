@@ -33,6 +33,7 @@ public class CallbackRequestHandler extends AbstractHandler {
         }
 
         String body = req.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
+        LOG.info("New req: " + body);
         boolean handled = callbackApiHandler.parse(body);
         if (!handled) {
             return;

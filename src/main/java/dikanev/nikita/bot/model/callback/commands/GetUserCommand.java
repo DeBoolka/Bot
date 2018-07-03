@@ -20,17 +20,17 @@ public class GetUserCommand extends VkCommand {
     private static final Logger LOG = LoggerFactory.getLogger(GetUserCommand.class);
 
     @Override
-    public CommandResponse init(CommandResponse cmdResponse) throws Exception {
-        if (cmdResponse.getMessage() != null
-                && cmdResponse.getMessage().getBody().toLowerCase().equals("menu")) {
-            sendMessage("Вы переходите в главное меню", cmdResponse.getIdUser());
-            return cmdResponse.setIdCommand(VkCommands.HOME.id()).finish();
+    public CommandResponse init(CommandResponse cmdResp) throws Exception {
+        if (cmdResp.getMessage() != null
+                && cmdResp.getMessage().getBody().toLowerCase().equals("menu")) {
+            sendMessage("Вы переходите в главное меню", cmdResp.getIdUser());
+            return cmdResp.setIdCommand(VkCommands.HOME.id()).finish();
         }
 
-        Map<String, String> argsMap = getUrlParametr(cmdResponse.getArgs());
+        Map<String, String> argsMap = getUrlParametr(cmdResp.getArgs());
         if (!argsMap.containsKey("id")) {
-            sendMessage("Введите id пользователя", cmdResponse.getIdUser());
-            return cmdResponse.finish();
+            sendMessage("Введите id пользователя", cmdResp.getIdUser());
+            return cmdResp.finish();
         }
 
         Map<String, Object> data;
@@ -40,21 +40,21 @@ public class GetUserCommand extends VkCommand {
             idCore = (Integer) data.get("id_core");
         } catch (Exception e) {
             LOG.warn("Get data exception ", e);
-            sendMessage("Проверьте правильность написания id", cmdResponse.getIdUser());
-            return cmdResponse.finish();
+            sendMessage("Проверьте правильность написания id", cmdResp.getIdUser());
+            return cmdResp.finish();
         }
 
         UserObject user;
         String token;
         try {
-            token = UserController.getInstance().getToken(cmdResponse.getIdUser());
+            token = UserController.getInstance().getToken(cmdResp.getIdUser());
             user = UserCoreController.getUser(token, idCore);
         } catch (NoAccessException e) {
-            sendMessage("У вас нет доступа к этой команде", cmdResponse.getIdUser());
-            return cmdResponse.setIdCommand(VkCommands.HOME.id()).setInit();
+            sendMessage("У вас нет доступа к этой команде", cmdResp.getIdUser());
+            return cmdResp.setIdCommand(VkCommands.HOME.id()).setInit();
         } catch (NotFoundException e) {
-            sendMessage("Пользователь не найден", cmdResponse.getIdUser());
-            return cmdResponse.setIdCommand(VkCommands.HOME.id()).setInit();
+            sendMessage("Пользователь не найден", cmdResp.getIdUser());
+            return cmdResp.setIdCommand(VkCommands.HOME.id()).setInit();
         }
 
         sendMessage("Id в vk: " + data.get("id") +
@@ -65,20 +65,20 @@ public class GetUserCommand extends VkCommand {
                         "\nId текущей команды: " + data.get("id_command") +
                         "\nТекущие аргументы: " + data.get("args") +
                         "\nТокен: " + data.get("token") + "\n"
-                , cmdResponse.getIdUser());
+                , cmdResp.getIdUser());
 
-        return cmdResponse.setIdCommand(VkCommands.HOME.id()).setInit();
+        return cmdResp.setIdCommand(VkCommands.HOME.id()).setInit();
 
     }
 
     @Override
-    public CommandResponse handle(CommandResponse commandResponse) throws Exception {
-        List<String> args = List.of(commandResponse.getText().split(" "));
-        Map<String, String> argsMap = getUrlParametr(commandResponse.getArgs());
+    public CommandResponse handle(CommandResponse cmdResp) throws Exception {
+        List<String> args = List.of(cmdResp.getText().split(" "));
+        Map<String, String> argsMap = getUrlParametr(cmdResp.getArgs());
 
-        argsMap.put("id", commandResponse.getText().trim());
-        commandResponse.setArgs(mapToGetString(argsMap));
+        argsMap.put("id", cmdResp.getText().trim());
+        cmdResp.setArgs(mapToGetString(argsMap));
 
-        return commandResponse.setInit();
+        return cmdResp.setInit();
     }
 }
