@@ -2,12 +2,14 @@ package dikanev.nikita.bot.controller.users;
 
 import dikanev.nikita.bot.api.exceptions.ApiException;
 import dikanev.nikita.bot.api.exceptions.InvalidParametersException;
+import dikanev.nikita.bot.api.exceptions.UnidentifiedException;
 import dikanev.nikita.bot.api.objects.UserObject;
 import dikanev.nikita.bot.controller.db.users.UserDBController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.Map;
 
 public class UserController {
@@ -45,6 +47,7 @@ public class UserController {
 
     //Получает юзера из ядра
     public UserObject getUser(String token, int idUser) throws SQLException, ApiException {
+        idUser = UserDBController.getInstance().getIdCore(idUser);
         return UserCoreController.getUser(token, idUser);
     }
 
@@ -60,8 +63,8 @@ public class UserController {
 
     //Применение инвайта от другого пользователя
     public UserObject inInvite(int idUser, String invite) throws InvalidParametersException {
-        //todo: Сделать ввод инвайт кода
-        return null;
+        //todo: сделать
+        throw new IllegalStateException("Todo: Доделать");
     }
 
     //Получение хеша строки

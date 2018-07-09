@@ -31,9 +31,9 @@ public class MessagesHandler {
 
             handle(commandResponse);
         } catch (SQLException e) {
-            LOG.warn("DB error in parseMessage: " + e.getMessage());
+            LOG.warn("DB error in parseMessage: " + e.getMessage(), e);
         } catch (Exception e) {
-            LOG.error("Unknown error in parseMessage: " + e.getMessage());
+            LOG.error("Unknown error in parseMessage: " + e.getMessage(), e);
         }
     }
 

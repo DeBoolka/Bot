@@ -16,15 +16,28 @@ public class CoreController {
     private static final Logger LOG = LoggerFactory.getLogger(CoreController.class);
 
     public static ApiObject execute(String command, Map<String, String> args) throws ApiException {
-        CoreResponseClient response;
         try {
-            response = CoreClientStorage.getInstance().getClient().get(command, args);
-            if (response.getStatusCode() == 200) {
-                return ObjectsController.getApiObject(response.getContent());
-            }
+            return executeHandle(command, CoreClientStorage.getInstance().getClient().get(command, args));
         } catch (IOException e) {
             LOG.warn("Server is not available: ", e);
             throw new ConnectException("Команда временно недостпна");
+        }
+    }
+
+    public static ApiObject executeArgsArray(String command, Map<String, String[]> args) throws ApiException {
+        try {
+            return executeHandle(command, CoreClientStorage.getInstance().getClient().getArray(command, args));
+        } catch (IOException e) {
+            LOG.warn("Server is not available: ", e);
+            throw new ConnectException("Команда временно недостпна");
+        }
+    }
+
+    public static ApiObject executeHandle(String command, CoreResponseClient response) throws ApiException {
+        try {
+            if (response.getStatusCode() == 200) {
+                return ObjectsController.getApiObject(response.getContent());
+            }
         } catch (NotFoundException e) {
             throw new NotFoundException("Команда временно недостпна");
         } catch (InvalidParametersException e) {

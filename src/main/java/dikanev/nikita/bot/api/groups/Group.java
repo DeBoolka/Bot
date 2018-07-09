@@ -26,22 +26,6 @@ public class Group {
         this.name = name;
     }
 
-    //Проверка на доступ к команде по id группы
-    public static boolean hasRight(int idGroup, int idCommand){
-        try {
-            return AccessGroupController.getInstance().hasAccessGroup(idGroup, idCommand);
-        } catch (SQLException e) {
-            LOG.warn(e.getSQLState());
-        }
-
-        return false;
-    }
-
-    //Проверка на доступ к команде
-    public boolean hasRight(int idCommand){
-        return hasRight(this.id, idCommand);
-    }
-
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;

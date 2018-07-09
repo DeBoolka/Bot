@@ -1,11 +1,11 @@
 package dikanev.nikita.bot.api.groups;
 
 public enum Groups {
-    ROOT("root", 0),
-    ADMIN("admin", 1),
-    UNKNOWN("unknown", 2),
-    USER("user", 3),
-    TESTER("tester", 4);
+    ROOT("root", 1),
+    ADMIN("admin", 2),
+    UNKNOWN("unknown", 3),
+    USER("user", 4),
+    TESTER("tester", 5);
 
     private String name;
 

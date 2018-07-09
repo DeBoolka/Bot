@@ -27,7 +27,7 @@ public class HomeCommand extends VkCommand {
 
         switch (command) {
             case "help":
-                return cmdResp.setIdCommand(VkCommands.HELP.id()).setInit();
+                return cmdResp.setInit();
 
             case "callback":
                 return cmdResp.setIdCommand(VkCommands.CALLBACK_TEST.id())

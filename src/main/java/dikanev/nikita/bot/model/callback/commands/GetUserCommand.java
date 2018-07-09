@@ -1,6 +1,5 @@
 package dikanev.nikita.bot.model.callback.commands;
 
-import dikanev.nikita.bot.api.exceptions.ApiException;
 import dikanev.nikita.bot.api.exceptions.NoAccessException;
 import dikanev.nikita.bot.api.exceptions.NotFoundException;
 import dikanev.nikita.bot.api.objects.UserObject;
@@ -11,7 +10,6 @@ import dikanev.nikita.bot.model.callback.VkCommands;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
@@ -27,7 +25,7 @@ public class GetUserCommand extends VkCommand {
             return cmdResp.setIdCommand(VkCommands.HOME.id()).finish();
         }
 
-        Map<String, String> argsMap = getUrlParametr(cmdResp.getArgs());
+        Map<String, String> argsMap = getUrlParameter(cmdResp.getArgs());
         if (!argsMap.containsKey("id")) {
             sendMessage("Введите id пользователя", cmdResp.getIdUser());
             return cmdResp.finish();
@@ -74,7 +72,7 @@ public class GetUserCommand extends VkCommand {
     @Override
     public CommandResponse handle(CommandResponse cmdResp) throws Exception {
         List<String> args = List.of(cmdResp.getText().split(" "));
-        Map<String, String> argsMap = getUrlParametr(cmdResp.getArgs());
+        Map<String, String> argsMap = getUrlParameter(cmdResp.getArgs());
 
         argsMap.put("id", cmdResp.getText().trim());
         cmdResp.setArgs(mapToGetString(argsMap));

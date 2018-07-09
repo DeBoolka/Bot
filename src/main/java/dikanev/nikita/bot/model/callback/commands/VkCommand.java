@@ -55,18 +55,17 @@ public abstract class VkCommand {
     }
 
     public static void sendMessage(String msg, int vkId, boolean one_time, List<List<TK>> buttons) throws ClientException, ApiException {
-        sendMessage(msg, vkId, one_time, (List<TK>[]) buttons.toArray());
-        /*JsonArray columnButton = new JsonArray();
+        JsonArray columnButton = new JsonArray();
         buttons.forEach(c -> {
             JsonArray rowButton = new JsonArray();
             c.forEach(r -> {
                 JsonObject payload = new JsonObject();
-                payload.addProperty("button", r);
+                payload.addProperty("button", r.getPayload());
 
                 JsonObject action = new JsonObject();
                 action.addProperty("type", "text");
                 action.addProperty("payload", payload.toString());
-                action.addProperty("label", r);
+                action.addProperty("label", r.getMsg());
 
                 JsonObject button = new JsonObject();
                 button.add("action", action);
@@ -81,48 +80,6 @@ public abstract class VkCommand {
         messageObject.addProperty("one_time", one_time);
         messageObject.add("buttons", columnButton);
 
-
-        System.out.println(messageObject);
-        VkClientStorage.getInstance().vk().messages()
-                .send(DataStorage.getInstance().getActor())
-                .randomId(new Random().nextInt(10000))
-                .message(msg)
-                .unsafeParam("keyboard", messageObject)
-                .peerId(vkId).execute();*/
-    }
-
-    public static void sendMessage(String msg, int vkId, List<List<TK>> buttons) throws ClientException, ApiException {
-        sendMessage(msg, vkId, false, buttons);
-    }
-
-    @SafeVarargs
-    public static void sendMessage(String msg, int vkId, boolean one_time, List<TK>... buttons) throws ClientException, ApiException {
-        JsonArray columnButton = new JsonArray();
-        for (List<TK> c : buttons) {
-            JsonArray rowButton = new JsonArray();
-            c.forEach(r -> {
-                JsonObject payload = new JsonObject();
-                payload.addProperty("button", r.getPayload());
-
-                JsonObject action = new JsonObject();
-                action.addProperty("type", "text");
-                action.addProperty("payload", payload.toString());
-                action.addProperty("label", r.getMsg());
-
-                JsonObject button = new JsonObject();
-                button.add("action", action);
-                button.addProperty("color", r.getColor());
-
-                rowButton.add(button);
-            });
-            columnButton.add(rowButton);
-        }
-
-        JsonObject messageObject = new JsonObject();
-        messageObject.addProperty("one_time", one_time);
-        messageObject.add("buttons", columnButton);
-
-
         VkClientStorage.getInstance().vk().messages()
                 .send(DataStorage.getInstance().getActor())
                 .randomId(new Random().nextInt(10000))
@@ -131,7 +88,17 @@ public abstract class VkCommand {
                 .peerId(vkId).execute();
     }
 
-    public static Map<String, String> getUrlParametr(String query) throws UnsupportedEncodingException {
+    public static void sendMessage(String msg, int vkId, List<List<TK>> buttons) throws ClientException, ApiException {
+        sendMessage(msg, vkId, false, buttons);
+    }
+
+    @SafeVarargs
+    public static void sendMessage(String msg, int vkId, boolean one_time, List<TK>... buttons) throws ClientException, ApiException {
+        List<List<TK>> btns = new ArrayList<>(List.of(buttons));
+        sendMessage(msg, vkId, one_time, btns);
+    }
+
+    public static Map<String, String> getUrlParameter(String query) throws UnsupportedEncodingException {
         final Map<String, String> query_pairs = new HashMap<>();
         final String[] pairs = query.split("&");
         for (String pair : pairs) {
@@ -151,6 +118,18 @@ public abstract class VkCommand {
 
         for (Map.Entry<String, String> entry : params.entrySet()) {
             builder.append("&").append(entry.getKey()).append("=").append(entry.getValue() != null ? escape(entry.getValue()) : "");
+        }
+
+        return builder.toString();
+    }
+
+    protected static String mapArrayToGetString(Map<String, String[]> params) {
+        StringBuilder builder = new StringBuilder();
+
+        for (Map.Entry<String, String[]> entry : params.entrySet()) {
+            Arrays.stream(entry.getValue()).forEach(
+                    val -> builder.append("&").append(entry.getKey()).append("=").append(val != null ? escape(val) : "")
+            );
         }
 
         return builder.toString();
@@ -191,7 +170,7 @@ public abstract class VkCommand {
 
         private String color;
 
-        private String payload = null;
+        private String payload;
 
         public TK(String color, String text, String payload) {
             this.color = color;

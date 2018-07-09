@@ -52,24 +52,4 @@ public class User {
     public int getIdGroup() {
         return idGroup;
     }
-
-    //Проверка доступа по текущей группе
-    public boolean hasRightByGroup(int idCommand){
-        return Group.hasRight(idGroup, idCommand);
-    }
-
-    //Проверка доступа по id
-    public static boolean hasRightByUser(int idUser, int idCommand){
-        try {
-            return AccessGroupController.getInstance().hasAccessUser(idUser, idCommand);
-        } catch (SQLException ignore) {
-        }
-
-        return false;
-    }
-
-    //Проверка доступа по текущему id
-    public boolean hasRightByUser(int idCommand) {
-        return hasRightByUser(id, idCommand);
-    }
 }

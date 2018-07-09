@@ -1,6 +1,5 @@
 package dikanev.nikita.bot.model.callback.commands;
 
-import com.vk.api.sdk.objects.messages.Message;
 import dikanev.nikita.bot.model.callback.CommandResponse;
 import dikanev.nikita.bot.model.callback.VkCommands;
 
@@ -27,7 +26,7 @@ public class CallbackTestCommand extends VkCommand {
             return cmdResp.setIdCommand(VkCommands.HOME.id()).setInit();
         }
 
-        Map<String, String> argsMap = getUrlParametr(cmdResp.getArgs());
+        Map<String, String> argsMap = getUrlParameter(cmdResp.getArgs());
         List<String> splitMessage = new ArrayList<>(List.of(cmdResp.getText().split(" ")));
 
         int findIndex;

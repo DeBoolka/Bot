@@ -21,7 +21,7 @@ public class CreateUserCommand extends VkCommand {
             return cmdResp.setIdCommand(VkCommands.HOME.id()).finish();
         }
 
-        Map<String, String> argsMap = getUrlParametr(cmdResp.getArgs());
+        Map<String, String> argsMap = getUrlParameter(cmdResp.getArgs());
         StringBuilder resp = new StringBuilder();
         int indexArg = 0;
 
@@ -91,7 +91,7 @@ public class CreateUserCommand extends VkCommand {
     @Override
     public CommandResponse handle(CommandResponse cmdResp) throws Exception {
         List<String> args = List.of(cmdResp.getText().split(" "));
-        Map<String, String> argsMap = getUrlParametr(cmdResp.getArgs());
+        Map<String, String> argsMap = getUrlParameter(cmdResp.getArgs());
 
         if (argsMap.containsKey("default_group")) {
             String defGroup = argsMap.get("default_group");

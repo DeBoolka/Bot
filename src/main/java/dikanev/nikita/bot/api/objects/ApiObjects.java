@@ -4,37 +4,40 @@ import dikanev.nikita.bot.api.exceptions.NotFoundException;
 
 public enum ApiObjects {
     //При добавлении сюда не забудте добавить в getObjectClass(String)
-    EXCEPTION(ExceptionObject.class),
-    GROUP(GroupObject.class),
-    USER(UserObject.class),
-    MESSAGE(MessageObject.class);
+    ACCESS_GROUP(AccessGroupObject.class, "accessgroup"),
+
+    ARRAY(ArrayObject.class, "array"),
+    ARRAY_ACCESS_OBJECT(ArrayObject.class, "array"),
+
+    EXCEPTION(ExceptionObject.class, "error"),
+    GROUP(GroupObject.class, "group"),
+    MESSAGE(MessageObject.class, "message"),
+    USER(UserObject.class, "user"),;
 
     private Class<? extends ApiObject> objectClass;
 
-    ApiObjects(Class<? extends ApiObject> objectClass) {
+    private String objectTypeName;
+
+    ApiObjects(Class<? extends ApiObject> objectClass, String objectTypeName) {
         this.objectClass = objectClass;
+        this.objectTypeName = objectTypeName;
     }
 
     public Class<? extends ApiObject> getObjectClass() {
         return objectClass;
     }
 
+    public String getObjectTypeName() {
+        return objectTypeName;
+    }
+
     public static Class<? extends ApiObject> getObjectClass(String name) throws NotFoundException {
-        switch (name.toLowerCase()) {
-            case "error":
-                return EXCEPTION.getObjectClass();
-
-            case "group":
-                return GROUP.getObjectClass();
-
-            case "user":
-                return USER.getObjectClass();
-
-            case "message":
-                return MESSAGE.getObjectClass();
-
-            default:
-                throw new NotFoundException("Object not found");
+        name = name.toLowerCase();
+        for (ApiObjects object : ApiObjects.values()) {
+            if (object.getObjectTypeName().equals(name)) {
+                return object.getObjectClass();
+            }
         }
+        throw new NotFoundException("Object not found");
     }
 }

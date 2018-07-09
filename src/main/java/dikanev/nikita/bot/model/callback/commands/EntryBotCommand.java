@@ -1,11 +1,12 @@
 package dikanev.nikita.bot.model.callback.commands;
 
-import dikanev.nikita.bot.api.exceptions.InvalidParametersException;
 import dikanev.nikita.bot.api.groups.Groups;
 import dikanev.nikita.bot.api.objects.UserObject;
 import dikanev.nikita.bot.controller.users.UserController;
 import dikanev.nikita.bot.model.callback.CommandResponse;
 import dikanev.nikita.bot.model.callback.VkCommands;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,9 +14,12 @@ import java.util.Map;
 
 //Узел который приветствует юзера, и обрабатывает первичные данные
 public class EntryBotCommand extends VkCommand {
+
+    private static final Logger LOG = LoggerFactory.getLogger(EntryBotCommand.class);
+
     @Override
     public CommandResponse init(CommandResponse cmdResp) throws Exception {
-        Map<String, String> args = getUrlParametr(cmdResp.getArgs());
+        Map<String, String> args = getUrlParameter(cmdResp.getArgs());
         if (args.size() == 0) {
             return welcomeMessage(cmdResp, args);
         } else if (args.containsKey("isInvite")) {
@@ -29,7 +33,7 @@ public class EntryBotCommand extends VkCommand {
 
     @Override
     public CommandResponse handle(CommandResponse cmdResp) throws Exception {
-        Map<String, String> args = getUrlParametr(cmdResp.getArgs());
+        Map<String, String> args = getUrlParameter(cmdResp.getArgs());
         String message = cmdResp.getText();
 
         if (args.containsKey("isInvite")) {
@@ -66,7 +70,7 @@ public class EntryBotCommand extends VkCommand {
                     "Вы в любое время можете ввести пригласительный в меню.", cmdResp.getIdUser());
 
             args.clear();
-            return cmdResp.setIdCommand(VkCommands.BROKER_MENU.id()).setArgs(mapToGetString(args)).setInit();
+            return cmdResp.setIdCommand(VkCommands.MENU.id()).setArgs(mapToGetString(args)).setInit();
         }
 
         sendMessage("Введите ваш пригласительный", cmdResp.getIdUser());
@@ -83,7 +87,7 @@ public class EntryBotCommand extends VkCommand {
         UserObject user;
         try {
             user = UserController.getInstance().inInvite(cmdResp.getIdUser(), invite);
-        } catch (InvalidParametersException e) {
+        } catch (Exception e) {
             List<List<TK>> buttons = new ArrayList<>(List.of(
                     List.of(TK.getDefault("Да"), TK.getDefault("Нет"))
             ));
@@ -102,11 +106,12 @@ public class EntryBotCommand extends VkCommand {
             }
         }
         if (groupName == null) {
-            throw new IllegalStateException("Not found Group id");
+            LOG.warn("Not found Group id: " + user.getIdGroup());
+            groupName = "null";
         }
 
         sendMessage("Вам присвоена группа " + groupName, cmdResp.getIdUser());
         args.clear();
-        return cmdResp.setArgs(mapToGetString(args)).setIdCommand(VkCommands.BROKER_MENU.id()).setInit();
+        return cmdResp.setArgs(mapToGetString(args)).setIdCommand(VkCommands.MENU.id()).setInit();
     }
 }

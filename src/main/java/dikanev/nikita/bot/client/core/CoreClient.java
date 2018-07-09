@@ -36,6 +36,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.security.*;
 import java.security.cert.CertificateException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -109,7 +110,7 @@ public class CoreClient {
                 .build();
 
         try {
-            get("", null);
+            get("", (String) null);
         } catch (IOException e) {
             throw new UnidentifiedException("Error connect core");
         }
@@ -129,6 +130,18 @@ public class CoreClient {
 
         for (Map.Entry<String, String> entry : params.entrySet()) {
             builder.append("&").append(entry.getKey()).append("=").append(entry.getValue() != null ? escape(entry.getValue()) : "");
+        }
+
+        return builder.toString();
+    }
+
+    private static String mapArrayToGetString(Map<String, String[]> params) {
+        StringBuilder builder = new StringBuilder();
+
+        for (Map.Entry<String, String[]> entry : params.entrySet()) {
+            Arrays.stream(entry.getValue()).forEach(
+                    val -> builder.append("&").append(entry.getKey()).append("=").append(val != null ? escape(val) : "")
+            );
         }
 
         return builder.toString();
@@ -195,14 +208,24 @@ public class CoreClient {
     }
 
     public CoreResponseClient get(String path) throws IOException {
-        return get(path, null);
+        return get(path, (String) null);
     }
 
     public CoreResponseClient get(String path, Map<String, String> params) throws IOException {
+        return get(path, MapUtils.isNotEmpty(params) ? mapToGetString(params) : null);
+    }
+
+    public CoreResponseClient getArray(String path, Map<String, String[]> params) throws IOException {
+        return get(path, MapUtils.isNotEmpty(params) ? mapArrayToGetString(params) : null);
+    }
+
+    private CoreResponseClient get(String path, String params) throws IOException {
         String url = hostApi + path;
-        if (MapUtils.isNotEmpty(params)) {
-            url += "?" + mapToGetString(params);
+        if (params != null) {
+            url += "?" + params;
         }
+
+        LOG.debug("Get request: " + url);
 
         HttpGet request = new HttpGet(url);
         return call(request);

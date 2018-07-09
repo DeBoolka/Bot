@@ -3,13 +3,12 @@ package dikanev.nikita.bot.controller.db.users;
 import com.google.common.hash.Hashing;
 import dikanev.nikita.bot.api.exceptions.ApiException;
 import dikanev.nikita.bot.api.exceptions.NotFoundException;
+import dikanev.nikita.bot.api.groups.Groups;
 import dikanev.nikita.bot.api.objects.UserObject;
 import dikanev.nikita.bot.controller.db.commands.CommandDBController;
-import dikanev.nikita.bot.controller.users.UserController;
 import dikanev.nikita.bot.controller.users.UserCoreController;
 import dikanev.nikita.bot.model.callback.VkCommands;
 import dikanev.nikita.bot.model.storage.DBStorage;
-import dikanev.nikita.bot.model.storage.DataStorage;
 import dikanev.nikita.bot.model.storage.clients.CoreClientStorage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +18,6 @@ import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.TreeMap;
 
 public class UserDBController {
 
@@ -35,7 +33,7 @@ public class UserDBController {
 
     //Создание человека
     public UserObject createUser(String token, int id, String name, String sName) throws SQLException, ApiException {
-        return createUser(token, id, 3, name, sName);
+        return createUser(token, id, Groups.UNKNOWN.getId(), name, sName);
     }
 
     //Создание человека
@@ -59,7 +57,7 @@ public class UserDBController {
             throw new IllegalStateException("Failed to create a user");
         }
 
-        CommandDBController.getInstance().createCurrentCommand(id, "", VkCommands.HOME.ordinal());
+        CommandDBController.getInstance().createCurrentCommand(id, "", VkCommands.ENTRY_BOT.ordinal());
 
         return user;
     }
@@ -123,6 +121,26 @@ public class UserDBController {
 
         res.close();
         return resMap.size() > 0 ? resMap : null;
+    }
+
+    //Возвращает map с ключами: id, id_core, id_command, token, args
+    public int getIdCore(int id) throws SQLException {
+        String sql = "SELECT id_core " +
+                "FROM users " +
+                "WHERE id = ? " +
+                "LIMIT 1;";
+
+        prStatement = DBStorage.getInstance().getConnection().prepareStatement(sql);
+        prStatement.setInt(1, id);
+        ResultSet res = prStatement.executeQuery();
+
+        int idCore = -1;
+        while (res.next()) {
+            idCore = res.getInt("id_core");
+        }
+
+        res.close();
+        return idCore;
     }
 
     //Получение токена

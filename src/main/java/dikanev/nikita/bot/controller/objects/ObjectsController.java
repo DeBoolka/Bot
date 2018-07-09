@@ -5,7 +5,9 @@ import com.google.gson.JsonSyntaxException;
 import dikanev.nikita.bot.api.exceptions.*;
 import dikanev.nikita.bot.api.objects.ApiObject;
 import dikanev.nikita.bot.api.objects.ApiObjects;
+import dikanev.nikita.bot.api.objects.ArrayObject;
 import dikanev.nikita.bot.api.objects.ExceptionObject;
+import dikanev.nikita.bot.api.objects.deserialization.ArrayJsonAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,7 +15,7 @@ public class ObjectsController {
 
     private static final Logger LOG = LoggerFactory.getLogger(ObjectsController.class);
 
-    private static Gson gson = new Gson();
+    private static Gson gson = getGson();
 
     public static ApiObject getApiObject(String objectString) throws InvalidParametersException, NotFoundException {
         ApiObject object;
@@ -25,6 +27,10 @@ public class ObjectsController {
         }
 
         return gson.fromJson(objectString, ApiObjects.getObjectClass(object.getType()));
+    }
+
+    private static Gson getGson() {
+        return new Gson().newBuilder().registerTypeAdapter(ArrayObject.class, new ArrayJsonAdapter()).create();
     }
 
     //Если объект ошибка кидает исключение
