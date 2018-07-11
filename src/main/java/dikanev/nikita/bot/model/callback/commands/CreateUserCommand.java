@@ -18,7 +18,7 @@ public class CreateUserCommand extends VkCommand {
         if (cmdResp.getMessage() != null
                 && cmdResp.getMessage().getBody().toLowerCase().equals("menu")) {
             sendMessage("Вы переходите в главное меню", cmdResp.getIdUser());
-            return cmdResp.setIdCommand(VkCommands.HOME.id()).finish();
+            return cmdResp.setIdCommand(VkCommands.MENU.id()).finish();
         }
 
         Map<String, String> argsMap = getUrlParameter(cmdResp.getArgs());
@@ -85,7 +85,7 @@ public class CreateUserCommand extends VkCommand {
             return cmdResp.finish();
         }
 
-        return cmdResp.setIdCommand(VkCommands.HOME.id()).setInit();
+        return cmdResp.setIdCommand(VkCommands.MENU.id()).setInit();
     }
 
     @Override
