@@ -22,7 +22,7 @@ public class GetUserCommand extends VkCommand {
         if (cmdResp.getMessage() != null
                 && cmdResp.getMessage().getBody().toLowerCase().equals("menu")) {
             sendMessage("Вы переходите в главное меню", cmdResp.getIdUser());
-            return cmdResp.setIdCommand(VkCommands.HOME.id()).finish();
+            return cmdResp.setIdCommand(VkCommands.MENU.id()).finish();
         }
 
         Map<String, String> argsMap = getUrlParameter(cmdResp.getArgs());
@@ -49,10 +49,10 @@ public class GetUserCommand extends VkCommand {
             user = UserCoreController.getUser(token, idCore);
         } catch (NoAccessException e) {
             sendMessage("У вас нет доступа к этой команде", cmdResp.getIdUser());
-            return cmdResp.setIdCommand(VkCommands.HOME.id()).setInit();
+            return cmdResp.setIdCommand(VkCommands.MENU.id()).setInit();
         } catch (NotFoundException e) {
             sendMessage("Пользователь не найден", cmdResp.getIdUser());
-            return cmdResp.setIdCommand(VkCommands.HOME.id()).setInit();
+            return cmdResp.setIdCommand(VkCommands.MENU.id()).setInit();
         }
 
         sendMessage("Id в vk: " + data.get("id") +
@@ -65,7 +65,7 @@ public class GetUserCommand extends VkCommand {
                         "\nТокен: " + data.get("token") + "\n"
                 , cmdResp.getIdUser());
 
-        return cmdResp.setIdCommand(VkCommands.HOME.id()).setInit();
+        return cmdResp.setIdCommand(VkCommands.MENU.id()).setInit();
 
     }
 

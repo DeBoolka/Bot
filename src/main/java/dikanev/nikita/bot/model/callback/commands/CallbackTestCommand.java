@@ -23,7 +23,7 @@ public class CallbackTestCommand extends VkCommand {
     @Override
     public CommandResponse handle(CommandResponse cmdResp) throws Exception {
         if (cmdResp.getText().equals("Меню")) {
-            return cmdResp.setIdCommand(VkCommands.HOME.id()).setInit();
+            return cmdResp.setIdCommand(VkCommands.MENU.id()).setInit();
         }
 
         Map<String, String> argsMap = getUrlParameter(cmdResp.getArgs());
@@ -54,7 +54,7 @@ public class CallbackTestCommand extends VkCommand {
             String args = mapToGetString(argsMap);
             sendMessage("Вот ваши текущие аргументы:\n" + args, cmdResp.getIdUser());
             sendMessage("Вся информация заполнена\nВы переходите в меню", cmdResp.getIdUser());
-            return cmdResp.setIdCommand(VkCommands.HOME.id()).finish();
+            return cmdResp.setIdCommand(VkCommands.MENU.id()).finish();
         }
 
         int splitSize = splitMessage.size();

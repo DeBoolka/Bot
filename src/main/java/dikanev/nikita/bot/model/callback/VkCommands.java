@@ -1,12 +1,14 @@
 package dikanev.nikita.bot.model.callback;
 
 import dikanev.nikita.bot.model.callback.commands.*;
+import dikanev.nikita.bot.model.callback.commands.menus.AdminMenuCommand;
 
 public enum VkCommands {
     ENTRY_BOT(new EntryBotCommand()),
-    MENU(new MenuCommand()),
 
-    HOME(new HomeCommand()),
+    MENU(new MenuCommand()),
+    ADMIN_MENU(new AdminMenuCommand()),
+
     CALLBACK_TEST(new CallbackTestCommand()),
     CREATE_USER(new CreateUserCommand()),
     GET_USER(new GetUserCommand());
