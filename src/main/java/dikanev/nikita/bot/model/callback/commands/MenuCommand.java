@@ -37,7 +37,7 @@ public class MenuCommand extends VkCommandHandler {
 
         for (Map.Entry<String, CommandData> entry : commands.entrySet()) {
             CommandData cmdData = entry.getValue();
-            if (userMessage.toLowerCase().indexOf(cmdData.name.toLowerCase()) == 0) {
+            if (userMessage.toLowerCase().indexOf(cmdData.name.toLowerCase()) == 0 && cmdData.isAccess()) {
                 return cmdData.getCmdProcess().process(cmdResp, cmdData, commands);
             }
         }
