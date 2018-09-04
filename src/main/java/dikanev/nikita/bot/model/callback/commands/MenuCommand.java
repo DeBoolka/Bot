@@ -20,7 +20,7 @@ public class MenuCommand extends VkCommandHandler {
 
         final List<List<TK>> buttons = getButtons(commands);
 
-        homeMessageHandle(cmdResp, args, buttons);
+        messageHandle(cmdResp, args, buttons);
 
         return cmdResp.setArgs(mapToGetString(args)).finish();
     }
@@ -63,14 +63,14 @@ public class MenuCommand extends VkCommandHandler {
                     ),
                     "help", new CommandData("help",true, "- Выводит список команд", (resp, data, commands) -> {
                         Map<String, String> args = getUrlParameter(cmdResp.getArgs());
-                        args.put("homeMessage", helpCommand(commands));
+                        args.put("message", helpCommand(commands));
                         return cmdResp.setArgs(mapToGetString(args)).setInit();
                     })
             ));
     }
 
     @Override
-    protected String getHelloMessage() {
+    protected String getHelloMessage(CommandResponse cmd) {
         return "Вы в главном меню";
     }
 

@@ -44,20 +44,20 @@ public abstract class VkCommandHandler extends VkCommand {
     protected abstract Map<String, CommandData> getCommands(CommandResponse cmdResp);
 
     //Метод обрабатывающий отправку сообщения при входе в команду
-    protected void homeMessageHandle(CommandResponse cmdResp, Map<String, String> args, List<List<TK>> buttons) throws Exception {
-        String homeMessage = args.get("homeMessage");
-        if (homeMessage == null) {
-            sendMessage(getHelloMessage(), cmdResp.getIdUser(), true, buttons);
-            args.put("homeMessage", "default");
-        } else if(homeMessage.equals("default")) {
+    protected void messageHandle(CommandResponse cmdResp, Map<String, String> args, List<List<TK>> buttons) throws Exception {
+        String message = args.get("message");
+        if (message == null) {
+            sendMessage(getHelloMessage(cmdResp), cmdResp.getIdUser(), true, buttons);
+            args.put("message", "default");
+        } else if(message.equals("default")) {
             sendMessage("Введите help для получения списка команд", cmdResp.getIdUser(), true, buttons);
         } else {
-            sendMessage(homeMessage, cmdResp.getIdUser(), true, buttons);
-            args.put("homeMessage", "default");
+            sendMessage(message, cmdResp.getIdUser(), true, buttons);
+            args.put("message", "default");
         }
     }
 
-    protected abstract String getHelloMessage();
+    protected abstract String getHelloMessage(CommandResponse cmd);
 
     //Метод возвращающий help текст
     protected String helpCommand(Map<String, CommandData> commands) {
