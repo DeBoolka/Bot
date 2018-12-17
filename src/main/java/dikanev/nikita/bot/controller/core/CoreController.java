@@ -2,9 +2,9 @@ package dikanev.nikita.bot.controller.core;
 
 import dikanev.nikita.bot.api.exceptions.*;
 import dikanev.nikita.bot.api.objects.ApiObject;
-import dikanev.nikita.bot.client.core.CoreResponseClient;
+import dikanev.nikita.bot.service.client.core.CoreResponseClient;
 import dikanev.nikita.bot.controller.objects.ObjectsController;
-import dikanev.nikita.bot.model.storage.clients.CoreClientStorage;
+import dikanev.nikita.bot.service.storage.clients.CoreClientStorage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

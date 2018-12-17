@@ -1,12 +1,7 @@
 package dikanev.nikita.bot;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import dikanev.nikita.bot.model.callback.commands.VkCommand;
-import dikanev.nikita.bot.model.storage.*;
-import dikanev.nikita.bot.model.storage.clients.CoreClientStorage;
-import dikanev.nikita.bot.model.storage.clients.VkClientStorage;
+import dikanev.nikita.bot.service.storage.*;
+import dikanev.nikita.bot.service.storage.clients.CoreClientStorage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

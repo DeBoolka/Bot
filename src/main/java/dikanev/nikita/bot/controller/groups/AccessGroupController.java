@@ -3,13 +3,12 @@ package dikanev.nikita.bot.controller.groups;
 import dikanev.nikita.bot.api.exceptions.ApiException;
 import dikanev.nikita.bot.api.objects.UserObject;
 import dikanev.nikita.bot.controller.users.UserController;
-import dikanev.nikita.bot.model.storage.clients.CoreClientStorage;
+import dikanev.nikita.bot.service.storage.clients.CoreClientStorage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
