@@ -1,11 +1,10 @@
 package dikanev.nikita.bot.controller.commands;
 
 import dikanev.nikita.bot.api.exceptions.ApiException;
-import dikanev.nikita.bot.controller.db.commands.CommandDBController;
+import dikanev.nikita.bot.logic.connector.db.commands.CommandDBConnector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Map;
 
@@ -21,19 +20,19 @@ public class CommandController {
 
     //Создание команды
     public int createCurrentCommand(int idUser, String args, int idCommand) throws SQLException{
-        return CommandDBController.getInstance().createCurrentCommand(idUser, args, idCommand);
+        return CommandDBConnector.getInstance().createCurrentCommand(idUser, args, idCommand);
     }
 
     //Возвращает текущий id команды (id_command) и текущие аргументы (args)
     public Map<String, Object> getCurrentCommand(int userId) throws SQLException, ApiException {
-        return CommandDBController.getInstance().getCurrentCommand(userId);
+        return CommandDBConnector.getInstance().getCurrentCommand(userId);
     }
 
     public boolean setArgs(int userId, String args) throws SQLException {
-        return CommandDBController.getInstance().setArgs(userId, args);
+        return CommandDBConnector.getInstance().setArgs(userId, args);
     }
 
     public boolean setCurrentCommand(int idUser, String args, int idCommand) throws SQLException {
-        return CommandDBController.getInstance().setCurrentCommand(idUser, args, idCommand);
+        return CommandDBConnector.getInstance().setCurrentCommand(idUser, args, idCommand);
     }
 }

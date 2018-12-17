@@ -2,14 +2,12 @@ package dikanev.nikita.bot.controller.users;
 
 import dikanev.nikita.bot.api.exceptions.ApiException;
 import dikanev.nikita.bot.api.exceptions.InvalidParametersException;
-import dikanev.nikita.bot.api.exceptions.UnidentifiedException;
 import dikanev.nikita.bot.api.objects.UserObject;
-import dikanev.nikita.bot.controller.db.users.UserDBController;
+import dikanev.nikita.bot.logic.connector.db.users.UserDBConnector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.*;
-import java.util.ArrayList;
 import java.util.Map;
 
 public class UserController {
@@ -26,39 +24,39 @@ public class UserController {
 
     //Создание человека
     public UserObject createUser(String token, int id, String name, String sName) throws SQLException, ApiException {
-        return UserDBController.getInstance().createUser(token, id, name, sName);
+        return UserDBConnector.getInstance().createUser(token, id, name, sName);
     }
 
     //Создание человека
     public UserObject createUser(String token, int id, int idGroup, String name, String sName) throws SQLException, ApiException {
-        return UserDBController.getInstance().createUser(token, id, idGroup, name, sName);
+        return UserDBConnector.getInstance().createUser(token, id, idGroup, name, sName);
     }
 
     //Удаление человека
     public boolean deleteUser(int idUser) throws SQLException {
-        return UserDBController.getInstance().deleteUser(idUser);
+        return UserDBConnector.getInstance().deleteUser(idUser);
     }
 
     //Получение информации о человеке.
     //Возвращает map с ключами: id, id_core, id_command, token, args
     public Map<String, Object> getData(int idUser) throws SQLException {
-        return UserDBController.getInstance().getData(idUser);
+        return UserDBConnector.getInstance().getData(idUser);
     }
 
     //Получает юзера из ядра
     public UserObject getUser(String token, int idUser) throws SQLException, ApiException {
-        idUser = UserDBController.getInstance().getIdCore(idUser);
+        idUser = UserDBConnector.getInstance().getIdCore(idUser);
         return UserCoreController.getUser(token, idUser);
     }
 
     //Получить токен
     public String getToken(int id) throws SQLException, ApiException {
-        return UserDBController.getInstance().getToken(id);
+        return UserDBConnector.getInstance().getToken(id);
     }
 
     //Удалить токен
     private boolean deleteFromGraph(int idUser) throws SQLException {
-        return UserDBController.getInstance().deleteFromGraph(idUser);
+        return UserDBConnector.getInstance().deleteFromGraph(idUser);
     }
 
     //Применение инвайта от другого пользователя
@@ -69,6 +67,6 @@ public class UserController {
 
     //Получение хеша строки
     public String getHash(String text) {
-        return UserDBController.getInstance().getHash(text);
+        return UserDBConnector.getInstance().getHash(text);
     }
 }
