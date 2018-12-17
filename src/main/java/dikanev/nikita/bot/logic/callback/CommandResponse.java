@@ -1,6 +1,8 @@
 package dikanev.nikita.bot.logic.callback;
 
 import com.vk.api.sdk.objects.messages.Message;
+import dikanev.nikita.bot.service.client.parameter.HttpGetParameter;
+import dikanev.nikita.bot.service.client.parameter.Parameter;
 import org.checkerframework.checker.nullness.compatqual.NonNullType;
 
 public class CommandResponse {
@@ -9,7 +11,7 @@ public class CommandResponse {
 
     private int idCommand;
 
-    private String args;
+    private Parameter args;
 
     private Message message;
 
@@ -20,11 +22,11 @@ public class CommandResponse {
 
     private boolean isHandle = true;
 
-    public CommandResponse(int idUser, int idCommand, String args, Message message) {
+    public CommandResponse(int idUser, int idCommand, Parameter args, Message message) {
         this.idUser = idUser;
         this.idCommand = idCommand;
-        this.args = args;
         this.message = message;
+        this.args = args;
         setDefault();
     }
 
@@ -81,11 +83,16 @@ public class CommandResponse {
         return this;
     }
 
-    public String getArgs() {
+    public Parameter getArgs() {
         return args;
     }
 
     public CommandResponse setArgs(String args) {
+        this.args.set(args);
+        return this;
+    }
+
+    public CommandResponse setArgs(Parameter args) {
         this.args = args;
         return this;
     }

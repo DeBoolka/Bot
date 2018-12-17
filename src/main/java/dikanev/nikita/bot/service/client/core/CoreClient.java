@@ -2,6 +2,7 @@ package dikanev.nikita.bot.service.client.core;
 
 import dikanev.nikita.bot.api.exceptions.UnidentifiedException;
 import dikanev.nikita.bot.service.client.SslUtils;
+import dikanev.nikita.bot.service.client.parameter.Parameter;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -125,7 +126,7 @@ public class CoreClient {
         return result;
     }
 
-    private static String mapToGetString(Map<String, String> params) {
+    /*private static String mapToGetString(Map<String, String> params) {
         StringBuilder builder = new StringBuilder();
 
         for (Map.Entry<String, String> entry : params.entrySet()) {
@@ -153,7 +154,7 @@ public class CoreClient {
         } catch (UnsupportedEncodingException ex) {
             throw new RuntimeException(ex);
         }
-    }
+    }*/
 
     private SSLConnectionSocketFactory initSslContext(String keyStoreType, String keyStorePath, String keyStorePassword, String keyPassword,
                                                       String trustStoreType, String trustStorePath, String trustStorePassword)
@@ -184,22 +185,14 @@ public class CoreClient {
                 SSLConnectionSocketFactory.getDefaultHostnameVerifier());
     }
 
-    public void login(String username, String password) throws IOException {
-        Map<String, String> params = new HashMap<>();
-        params.put("login", username);
-        params.put("password", password);
-
-        post("/rest/user/login", mapToGetString(params));
-    }
-
     public CoreResponseClient put(String path) throws IOException {
         return put(path, null);
     }
 
-    public CoreResponseClient put(String path, Map<String, String> params) throws IOException {
+    public CoreResponseClient put(String path, Parameter params) throws IOException {
         String url = hostApi + path;
-        if (MapUtils.isNotEmpty(params)) {
-            url += "?" + mapToGetString(params);
+        if (params != null && !params.isEmpty()) {
+            url += "?" + params.getContent();
         }
 
         HttpPut request = new HttpPut(url);
@@ -211,12 +204,8 @@ public class CoreClient {
         return get(path, (String) null);
     }
 
-    public CoreResponseClient get(String path, Map<String, String> params) throws IOException {
-        return get(path, MapUtils.isNotEmpty(params) ? mapToGetString(params) : null);
-    }
-
-    public CoreResponseClient getArray(String path, Map<String, String[]> params) throws IOException {
-        return get(path, MapUtils.isNotEmpty(params) ? mapArrayToGetString(params) : null);
+    public CoreResponseClient get(String path, Parameter params) throws IOException {
+        return get(path, params != null && !params.isEmpty() ? params.getContent() : null);
     }
 
     private CoreResponseClient get(String path, String params) throws IOException {

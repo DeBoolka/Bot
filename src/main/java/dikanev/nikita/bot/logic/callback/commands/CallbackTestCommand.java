@@ -2,6 +2,7 @@ package dikanev.nikita.bot.logic.callback.commands;
 
 import dikanev.nikita.bot.logic.callback.CommandResponse;
 import dikanev.nikita.bot.logic.callback.VkCommands;
+import dikanev.nikita.bot.service.client.parameter.Parameter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +11,7 @@ import java.util.Map;
 public class CallbackTestCommand extends VkCommand {
 
     @Override
-    public CommandResponse init(CommandResponse cmdResp) throws Exception {
+    public CommandResponse init(CommandResponse cmdResp, Parameter args) throws Exception {
         sendMessage("Вы в проверке аргументов\n" +
                         "Ввод аргумантов:\n" +
                         "[key1] [value1] [key2] [value2] ...\n" +
@@ -21,26 +22,26 @@ public class CallbackTestCommand extends VkCommand {
     }
 
     @Override
-    public CommandResponse handle(CommandResponse cmdResp) throws Exception {
+    public CommandResponse handle(CommandResponse cmdResp, Parameter argsMap) throws Exception {
         if (cmdResp.getText().equals("Меню")) {
             return cmdResp.setIdCommand(VkCommands.MENU.id()).setInit();
         }
 
-        Map<String, String> argsMap = getUrlParameter(cmdResp.getArgs());
         List<String> splitMessage = new ArrayList<>(List.of(cmdResp.getText().split(" ")));
 
         int findIndex;
         if (argsMap.get("name") == null
                 && (findIndex = splitMessage.indexOf("name")) != -1
-                && findIndex + 1 < splitMessage.size()) {
-            argsMap.put("name", splitMessage.get(findIndex + 1));
+                && findIndex + 1 < splitMessage.size()
+        ) {
+            argsMap.set("name", splitMessage.get(findIndex + 1));
 
             splitMessage.remove(findIndex + 1);
             splitMessage.remove(findIndex);
         } else if (argsMap.get("s_name") == null
                 && (findIndex = splitMessage.indexOf("s_name")) != -1
                 && findIndex + 1 < splitMessage.size()) {
-            argsMap.put("s_name", splitMessage.get(findIndex + 1));
+            argsMap.set("s_name", splitMessage.get(findIndex + 1));
 
             splitMessage.remove(findIndex + 1);
             splitMessage.remove(findIndex);
@@ -51,7 +52,7 @@ public class CallbackTestCommand extends VkCommand {
         } else if (argsMap.get("s_name") == null) {
             sendMessage("Введите фамилию", cmdResp.getIdUser());
         } else {
-            String args = mapToGetString(argsMap);
+            String args = argsMap.getContent();
             sendMessage("Вот ваши текущие аргументы:\n" + args, cmdResp.getIdUser());
             sendMessage("Вся информация заполнена\nВы переходите в меню", cmdResp.getIdUser());
             return cmdResp.setIdCommand(VkCommands.MENU.id()).finish();
@@ -60,15 +61,15 @@ public class CallbackTestCommand extends VkCommand {
         int splitSize = splitMessage.size();
         for (int i = 0; i < splitSize;) {
             if (i + 1 < splitSize) {
-                argsMap.put(splitMessage.get(i), splitMessage.get(i + 1));
+                argsMap.set(splitMessage.get(i), splitMessage.get(i + 1));
             }
 
             i += 2;
         }
 
-        String args = mapToGetString(argsMap);
+        String args = argsMap.getContent();
         sendMessage("Вот ваши текущие аргументы:\n" + args, cmdResp.getIdUser());
 
-        return cmdResp.setIdCommand(VkCommands.CALLBACK_TEST.id()).setArgs(args).finish();
+        return cmdResp.setIdCommand(VkCommands.CALLBACK_TEST.id()).finish();
     }
 }

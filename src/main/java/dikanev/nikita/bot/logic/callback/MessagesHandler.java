@@ -6,6 +6,8 @@ import dikanev.nikita.bot.api.exceptions.NotFoundException;
 import dikanev.nikita.bot.controller.commands.CommandController;
 import dikanev.nikita.bot.controller.users.UserController;
 import dikanev.nikita.bot.logic.callback.commands.VkCommand;
+import dikanev.nikita.bot.service.client.parameter.HttpGetParameter;
+import dikanev.nikita.bot.service.client.parameter.Parameter;
 import dikanev.nikita.bot.service.storage.DataStorage;
 import dikanev.nikita.bot.service.storage.clients.CoreClientStorage;
 import dikanev.nikita.bot.service.storage.clients.VkClientStorage;
@@ -25,7 +27,7 @@ public class MessagesHandler {
             Map<String, Object> currentDataCommand = getCurrentDataCommand(message);
 
             int currentIdCommand = (Integer) currentDataCommand.get("id_command");
-            String args = (String) currentDataCommand.get("args");
+            Parameter args = new HttpGetParameter((String) currentDataCommand.get("args"));
             CommandResponse commandResponse = new CommandResponse(message.getUserId(), currentIdCommand, args, message);
             commandResponse.setText(message.getBody());
 
@@ -41,13 +43,13 @@ public class MessagesHandler {
         //Обработчик текущей команды
         if (commandResponse.isHandle()) {
             VkCommand currentCommand = getCommand(commandResponse.getIdCommand());
-            commandResponse = currentCommand.handle(commandResponse);
+            commandResponse = currentCommand.handle(commandResponse, commandResponse.getArgs());
         }
 
         //Вход в следующую команду
         if (commandResponse.isInit()) {
             VkCommand nextCommand = getCommand(commandResponse.getIdCommand());
-            commandResponse = nextCommand.init(commandResponse);
+            commandResponse = nextCommand.init(commandResponse, commandResponse.getArgs());
         }
 
         if (commandResponse.isTransit()) {
@@ -59,7 +61,7 @@ public class MessagesHandler {
 
     private static void setCurrentCommand(CommandResponse commandResponse) {
         try {
-            CommandController.getInstance().setCurrentCommand(commandResponse.getIdUser(), commandResponse.getArgs(), commandResponse.getIdCommand());
+            CommandController.getInstance().setCurrentCommand(commandResponse.getIdUser(), commandResponse.getArgs().getContent(), commandResponse.getIdCommand());
         } catch (SQLException e) {
             LOG.error("DB error: " + e.getMessage());
         }

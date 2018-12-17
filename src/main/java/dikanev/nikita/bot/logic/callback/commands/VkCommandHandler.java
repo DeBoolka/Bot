@@ -2,6 +2,7 @@ package dikanev.nikita.bot.logic.callback.commands;
 
 import dikanev.nikita.bot.controller.groups.AccessGroupController;
 import dikanev.nikita.bot.logic.callback.CommandResponse;
+import dikanev.nikita.bot.service.client.parameter.Parameter;
 import dikanev.nikita.bot.service.storage.clients.CoreClientStorage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +16,7 @@ public abstract class VkCommandHandler extends VkCommand {
     private static final Logger LOG = LoggerFactory.getLogger(VkCommandHandler.class);
 
     //Загружает из ядра доступность команд. Проставляет достум в map-е commands
-    protected void loadAccessCommands(CommandResponse cmdResp, Map<String, String> args, Map<String, CommandData> commands) {
+    protected void loadAccessCommands(CommandResponse cmdResp, Parameter args, Map<String, CommandData> commands) {
         final List<String> commandsName = new ArrayList<>();
         commands.forEach((key, val) -> {
             if (val.isLoadAccess()) {
@@ -41,19 +42,19 @@ public abstract class VkCommandHandler extends VkCommand {
     }
 
     //Возврщает map с путем доступа в качестве ключа (bot/vk/...) и в качестве значения CommandData
-    protected abstract Map<String, CommandData> getCommands(CommandResponse cmdResp);
+    protected abstract Map<String, CommandData> getCommands(CommandResponse cmdResp, Parameter args);
 
     //Метод обрабатывающий отправку сообщения при входе в команду
-    protected void messageHandle(CommandResponse cmdResp, Map<String, String> args, List<List<TK>> buttons) throws Exception {
-        String message = args.get("message");
+    protected void messageHandle(CommandResponse cmdResp, Parameter args, List<List<TK>> buttons) throws Exception {
+        String message = args.getF("message");
         if (message == null) {
             sendMessage(getHelloMessage(cmdResp), cmdResp.getIdUser(), true, buttons);
-            args.put("message", "default");
+            args.set("message", "default");
         } else if(message.equals("default")) {
             sendMessage("Введите help для получения списка команд", cmdResp.getIdUser(), true, buttons);
         } else {
             sendMessage(message, cmdResp.getIdUser(), true, buttons);
-            args.put("message", "default");
+            args.set("message", "default");
         }
     }
 

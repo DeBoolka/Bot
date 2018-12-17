@@ -6,6 +6,8 @@ import dikanev.nikita.bot.api.objects.MessageObject;
 import dikanev.nikita.bot.api.objects.UserObject;
 import dikanev.nikita.bot.controller.core.CoreController;
 import dikanev.nikita.bot.controller.objects.ObjectsController;
+import dikanev.nikita.bot.service.client.parameter.HttpGetParameter;
+import dikanev.nikita.bot.service.client.parameter.Parameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,8 +20,15 @@ public class UserCoreController {
     //Возвращает юзера.
     //Кидает исключения: NoAccessException, NotFoundException, UnidentifiedException
     public static UserObject getUser(String token, int id) throws ApiException {
-        ApiObject req = CoreController.execute("user/get", Map.of("token", token, "id", String.valueOf(id)));
+        Parameter getParam = new HttpGetParameter()
+                .add("token", token)
+                .add("id", String.valueOf(id));
 
+        ApiObject req = CoreController.execute("user/get"
+                , new HttpGetParameter()
+                        .add("token", token)
+                        .add("id", String.valueOf(id))
+        );
         ObjectsController.ifExceptionThrow(req);
 
         return ObjectsController.castObject(req, UserObject.class);
@@ -29,8 +38,12 @@ public class UserCoreController {
     //Кидает исключения: NoAccessException, InvalidParametersException, UnidentifiedException
     public static UserObject createUser(String token, int idGroup, String name, String sName) throws ApiException {
         ApiObject req = CoreController.execute("user/register",
-                Map.of("token", token, "id_group", String.valueOf(idGroup), "name", name, "s_name", sName));
-
+                new HttpGetParameter()
+                        .add("token", token)
+                        .add("id_group", String.valueOf(idGroup))
+                        .add("name", name)
+                        .add("s_name", sName)
+        );
         ObjectsController.ifExceptionThrow(req);
 
         return ObjectsController.castObject(req, UserObject.class);
@@ -38,7 +51,9 @@ public class UserCoreController {
 
     //Удаляет юзера.
     public static boolean deleteUser(String token, int id) throws ApiException {
-        ApiObject req = CoreController.execute("user/delete", Map.of("token", token, "id", String.valueOf(id)));
+        ApiObject req = CoreController.execute("user/delete", new HttpGetParameter()
+                .add("token", token)
+                .add("id", String.valueOf(id)));
 
         ObjectsController.ifExceptionThrow(req);
         MessageObject message = ObjectsController.castObject(req, MessageObject.class);
@@ -48,7 +63,9 @@ public class UserCoreController {
 
     //Получает токен юзера.
     public static String getToken(String token, int id) throws ApiException {
-        ApiObject req = CoreController.execute("user/create/token", Map.of("token", token, "id", String.valueOf(id)));
+        ApiObject req = CoreController.execute("user/create/token", new HttpGetParameter()
+                .add("token", token)
+                .add("id", String.valueOf(id)));
 
         ObjectsController.ifExceptionThrow(req);
         MessageObject message = ObjectsController.castObject(req, MessageObject.class);

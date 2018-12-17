@@ -5,14 +5,12 @@ import com.google.gson.JsonObject;
 import com.vk.api.sdk.exceptions.ApiException;
 import com.vk.api.sdk.exceptions.ClientException;
 import dikanev.nikita.bot.logic.callback.CommandResponse;
+import dikanev.nikita.bot.service.client.parameter.Parameter;
 import dikanev.nikita.bot.service.storage.DataStorage;
 import dikanev.nikita.bot.service.storage.clients.VkClientStorage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.util.*;
 
 public abstract class VkCommand {
@@ -27,9 +25,9 @@ public abstract class VkCommand {
         buttons = setDefaultKeyboardButtons();
     }
 
-    public abstract CommandResponse init(CommandResponse cmdResp) throws Exception;
+    public abstract CommandResponse init(CommandResponse cmdResp, Parameter args) throws Exception;
 
-    public abstract CommandResponse handle(CommandResponse cmdResp) throws Exception;
+    public abstract CommandResponse handle(CommandResponse cmdResp, Parameter args) throws Exception;
 
     public static void sendMessage(String msg, int vkId) throws ClientException, ApiException{
         VkClientStorage.getInstance().vk().messages()
@@ -95,51 +93,6 @@ public abstract class VkCommand {
     public static void sendMessage(String msg, int vkId, boolean one_time, List<TK>... buttons) throws ClientException, ApiException {
         List<List<TK>> btns = new ArrayList<>(List.of(buttons));
         sendMessage(msg, vkId, one_time, btns);
-    }
-
-    public static Map<String, String> getUrlParameter(String query) throws UnsupportedEncodingException {
-        final Map<String, String> query_pairs = new HashMap<>();
-        final String[] pairs = query.split("&");
-        for (String pair : pairs) {
-            final int idx = pair.indexOf("=");
-            final String key = idx > 0 ? URLDecoder.decode(pair.substring(0, idx), "UTF-8") : pair;
-            final String value = idx > 0 && pair.length() > idx + 1 ? URLDecoder.decode(pair.substring(idx + 1), "UTF-8") : null;
-            if (value != null) {
-                query_pairs.put(key, value);
-            }
-        }
-
-        return query_pairs;
-    }
-
-    protected static String mapToGetString(Map<String, String> params) {
-        StringBuilder builder = new StringBuilder();
-
-        for (Map.Entry<String, String> entry : params.entrySet()) {
-            builder.append("&").append(entry.getKey()).append("=").append(entry.getValue() != null ? escape(entry.getValue()) : "");
-        }
-
-        return builder.toString();
-    }
-
-    protected static String mapArrayToGetString(Map<String, String[]> params) {
-        StringBuilder builder = new StringBuilder();
-
-        for (Map.Entry<String, String[]> entry : params.entrySet()) {
-            Arrays.stream(entry.getValue()).forEach(
-                    val -> builder.append("&").append(entry.getKey()).append("=").append(val != null ? escape(val) : "")
-            );
-        }
-
-        return builder.toString();
-    }
-
-    private static String escape(String urlData) {
-        try {
-            return URLEncoder.encode(urlData, "UTF-8");
-        } catch (UnsupportedEncodingException ex) {
-            throw new RuntimeException(ex);
-        }
     }
 
     protected static boolean isTrue(String message) {

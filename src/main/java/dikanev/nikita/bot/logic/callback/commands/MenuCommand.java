@@ -2,6 +2,7 @@ package dikanev.nikita.bot.logic.callback.commands;
 
 import dikanev.nikita.bot.logic.callback.CommandResponse;
 import dikanev.nikita.bot.logic.callback.VkCommands;
+import dikanev.nikita.bot.service.client.parameter.Parameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,28 +13,23 @@ public class MenuCommand extends VkCommandHandler {
     private static final Logger LOG = LoggerFactory.getLogger(MenuCommand.class);
 
     @Override
-    public CommandResponse init(CommandResponse cmdResp) throws Exception {
-        Map<String, String> args = getUrlParameter(cmdResp.getArgs());
-
-        Map<String, CommandData> commands = getCommands(cmdResp);
+    public CommandResponse init(CommandResponse cmdResp, Parameter args) throws Exception {
+        Map<String, CommandData> commands = getCommands(cmdResp, cmdResp.getArgs());
         loadAccessCommands(cmdResp, args, commands);
 
         final List<List<TK>> buttons = getButtons(commands);
 
         messageHandle(cmdResp, args, buttons);
 
-        return cmdResp.setArgs(mapToGetString(args)).finish();
+        return cmdResp.finish();
     }
 
     @Override
-    public CommandResponse handle(CommandResponse cmdResp) throws Exception {
-        Map<String, String> args = getUrlParameter(cmdResp.getArgs());
-        String userMessage = cmdResp.getText();
-
-        Map<String, CommandData> commands = getCommands(cmdResp);
+    public CommandResponse handle(CommandResponse cmdResp, Parameter args) throws Exception {
+        Map<String, CommandData> commands = getCommands(cmdResp, cmdResp.getArgs());
         loadAccessCommands(cmdResp, args, commands);
 
-        cmdResp.setArgs(mapToGetString(args));
+        String userMessage = cmdResp.getText();
 
         for (Map.Entry<String, CommandData> entry : commands.entrySet()) {
             CommandData cmdData = entry.getValue();
@@ -47,7 +43,7 @@ public class MenuCommand extends VkCommandHandler {
 
     //Возврщает map с путем доступа в качестве ключа (bot/vk/...) и в качестве значения CommandData
     @Override
-    protected Map<String, CommandData> getCommands(CommandResponse cmdResp) {
+    protected Map<String, CommandData> getCommands(CommandResponse cmdResp, Parameter args) {
             return new LinkedHashMap<>(Map.of(
                     "bot/vk/admin/", new CommandData("Админ", " - Меню администратора", true, (resp, data, commands) ->
                             cmdResp.setArgs("").setIdCommand(VkCommands.ADMIN_MENU.id()).setInit()
@@ -62,9 +58,8 @@ public class MenuCommand extends VkCommandHandler {
                             unrealizedOperation(cmdResp)
                     ),
                     "help", new CommandData("help",true, "- Выводит список команд", (resp, data, commands) -> {
-                        Map<String, String> args = getUrlParameter(cmdResp.getArgs());
-                        args.put("message", helpCommand(commands));
-                        return cmdResp.setArgs(mapToGetString(args)).setInit();
+                        cmdResp.getArgs().set("message", helpCommand(commands));
+                        return cmdResp.setInit();
                     })
             ));
     }
