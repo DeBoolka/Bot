@@ -13,19 +13,11 @@ public class GroupDBConnector {
 
     private static final Logger LOG = LoggerFactory.getLogger(GroupDBConnector.class);
 
-    private static GroupDBConnector ourInstance = new GroupDBConnector();
-
-    private PreparedStatement prStatement;
-
-    public static GroupDBConnector getInstance() {
-        return ourInstance;
-    }
-
     //Создание группы
-    public int createGroup(String name) throws SQLException {
+    public static int createGroup(String name) throws SQLException {
         String sql = "INSERT groups(id, name) VALUES (NULL, ?)";
 
-        prStatement = DBStorage.getInstance().getConnection().prepareStatement(sql);
+        PreparedStatement prStatement = DBStorage.getInstance().getConnection().prepareStatement(sql);
         prStatement.setString(1, name);
         int res = prStatement.executeUpdate();
         prStatement.close();
@@ -39,10 +31,10 @@ public class GroupDBConnector {
     }
 
     //Создание группы
-    public int createGroup(String name, int id) throws SQLException {
+    public static int createGroup(String name, int id) throws SQLException {
         String sql = "INSERT groups(id, name) VALUES (?, ?)";
 
-        prStatement = DBStorage.getInstance().getConnection().prepareStatement(sql);
+        PreparedStatement prStatement = DBStorage.getInstance().getConnection().prepareStatement(sql);
         prStatement.setInt(1, id);
         prStatement.setString(2, name);
         int res = prStatement.executeUpdate();
@@ -57,12 +49,12 @@ public class GroupDBConnector {
     }
 
     //Удаление группы
-    public boolean deleteGroup(int idGroup) throws SQLException {
+    public static boolean deleteGroup(int idGroup) throws SQLException {
         String sql = "DELETE FROM groups " +
                 "WHERE id = ? " +
                 "LIMIT 1";
 
-        prStatement = DBStorage.getInstance().getConnection().prepareStatement(sql);
+        PreparedStatement prStatement = DBStorage.getInstance().getConnection().prepareStatement(sql);
         prStatement.setInt(1, idGroup);
         int countDelete = prStatement.executeUpdate();
         prStatement.close();
@@ -92,13 +84,13 @@ public class GroupDBConnector {
     }
 
     //Получение имени группы
-    public String getName(int idGroup) throws SQLException {
+    public static String getName(int idGroup) throws SQLException {
         String sql = "SELECT name " +
                 "FROM groups " +
                 "WHERE id = ? " +
                 "LIMIT 1;";
 
-        prStatement = DBStorage.getInstance().getConnection().prepareStatement(sql);
+        PreparedStatement prStatement = DBStorage.getInstance().getConnection().prepareStatement(sql);
         prStatement.setInt(1, idGroup);
         ResultSet res = prStatement.executeQuery();
 
@@ -112,7 +104,7 @@ public class GroupDBConnector {
     }
 
     //Получение последнего вставленного id
-    private int getLastId() throws SQLException{
+    private static int getLastId() throws SQLException{
         String sql = "SELECT LAST_INSERT_ID() AS id";
         int lastId = -1;
         Statement statement = DBStorage.getInstance().getConnection().createStatement();

@@ -22,8 +22,11 @@ public class ArrayJsonAdapter implements JsonDeserializer<ArrayObject> {
         String typeObjectsArray = object.get("typeObjects").getAsString();
 
         try {
-            Object arr = context.deserialize(object.get("objects"),
-                    Array.newInstance(ApiObjects.getObjectClass(typeObjectsArray), 0).getClass());
+            Class<? extends ApiObject> clazz = ApiObjects.getObjectClass(typeObjectsArray);
+            if (clazz == null) {
+                //todo: сделать нормальную обработку массивов
+            }
+            Object arr = context.deserialize(object.get("objects"), Array.newInstance(clazz, 0).getClass());
             List<ApiObject> list = new ArrayList<>(List.of((ApiObject[]) arr));
 
             return new ArrayObject(typeObjectsArray, list);

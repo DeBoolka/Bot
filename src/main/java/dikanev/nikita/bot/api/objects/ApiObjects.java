@@ -38,6 +38,6 @@ public enum ApiObjects {
                 return object.getObjectClass();
             }
         }
-        throw new NotFoundException("Object not found");
+        return null;
     }
 }

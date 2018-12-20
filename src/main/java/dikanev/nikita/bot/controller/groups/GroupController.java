@@ -21,21 +21,21 @@ public class GroupController {
 
     //Создание группы
     public int createGroup(String name) throws SQLException {
-        return GroupDBConnector.getInstance().createGroup(name);
+        return GroupDBConnector.createGroup(name);
     }
 
     //Создание группы
     public int createGroup(String name, int id) throws SQLException {
-        return GroupDBConnector.getInstance().createGroup(name, id);
+        return GroupDBConnector.createGroup(name, id);
     }
 
     //Удаление группы
     public boolean deleteGroup(int idGroup) throws SQLException {
-        return GroupDBConnector.getInstance().deleteGroup(idGroup);
+        return GroupDBConnector.deleteGroup(idGroup);
     }
 
     //Получение имени группы
     public String getName(int idGroup) throws SQLException {
-        return GroupDBConnector.getInstance().getName(idGroup);
+        return GroupDBConnector.getName(idGroup);
     }
 }

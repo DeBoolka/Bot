@@ -15,19 +15,11 @@ public class CommandDBConnector {
 
     private static final Logger LOG = LoggerFactory.getLogger(CommandDBConnector.class);
 
-    private static CommandDBConnector ourInstance = new CommandDBConnector();
-
-    private PreparedStatement prStatement;
-
-    public static CommandDBConnector getInstance() {
-        return ourInstance;
-    }
-
     //Создание команды
-    public int createCurrentCommand(int idUser, String args, int idCommand) throws SQLException {
+    public static int createCurrentCommand(int idUser, String args, int idCommand) throws SQLException {
         String sql = "INSERT graph(id_user, args, id_command) VALUES (?, ?, ?)";
 
-        prStatement = DBStorage.getInstance().getConnection().prepareStatement(sql);
+        PreparedStatement prStatement = DBStorage.getInstance().getConnection().prepareStatement(sql);
         prStatement.setInt(1, idUser);
         prStatement.setString(2, args);
         prStatement.setInt(3, idCommand);
@@ -43,13 +35,13 @@ public class CommandDBConnector {
     }
 
     //Получение текущей позиции на графе
-    public Map<String, Object> getCurrentCommand(int userId) throws SQLException, NotFoundException {
+    public static Map<String, Object> getCurrentCommand(int userId) throws SQLException, NotFoundException {
         String sql = "SELECT id_command, args " +
                 "FROM graph " +
                 "WHERE id_user = ? " +
                 "LIMIT 1";
 
-        prStatement = DBStorage.getInstance().getConnection().prepareStatement(sql);
+        PreparedStatement prStatement = DBStorage.getInstance().getConnection().prepareStatement(sql);
         prStatement.setInt(1, userId);
         ResultSet res = prStatement.executeQuery();
 
@@ -69,13 +61,13 @@ public class CommandDBConnector {
     }
 
     //Устанавливает текущие аргументы
-    public boolean setArgs(int userId, String args) throws SQLException {
+    public static boolean setArgs(int userId, String args) throws SQLException {
         String sql = "UPDATE graph " +
                 "SET args = ? " +
                 "WHERE id_user = ? " +
                 "LIMIT 1";
 
-        prStatement = DBStorage.getInstance().getConnection().prepareStatement(sql);
+        PreparedStatement prStatement = DBStorage.getInstance().getConnection().prepareStatement(sql);
         prStatement.setString(1, args);
         prStatement.setInt(2, userId);
         int res = prStatement.executeUpdate();
@@ -89,13 +81,13 @@ public class CommandDBConnector {
     }
 
     //Устанавливает текущую команду
-    public boolean setCurrentCommand(int idUser, String args, int idCommand) throws SQLException {
+    public static boolean setCurrentCommand(int idUser, String args, int idCommand) throws SQLException {
         String sql = "UPDATE graph " +
                 "SET args = ?, id_command = ? " +
                 "WHERE id_user = ? " +
                 "LIMIT 1";
 
-        prStatement = DBStorage.getInstance().getConnection().prepareStatement(sql);
+        PreparedStatement prStatement = DBStorage.getInstance().getConnection().prepareStatement(sql);
         prStatement.setString(1, args);
         prStatement.setInt(2, idCommand);
         prStatement.setInt(3, idUser);

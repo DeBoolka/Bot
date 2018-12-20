@@ -1,4 +1,4 @@
-package dikanev.nikita.bot.controller.users;
+package dikanev.nikita.bot.logic.connector.core;
 
 import dikanev.nikita.bot.api.exceptions.*;
 import dikanev.nikita.bot.api.objects.ApiObject;
@@ -11,11 +11,9 @@ import dikanev.nikita.bot.service.client.parameter.Parameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Map;
+public class UserCoreConnector {
 
-public class UserCoreController {
-
-    private static final Logger LOG = LoggerFactory.getLogger(UserCoreController.class);
+    private static final Logger LOG = LoggerFactory.getLogger(UserCoreConnector.class);
 
     //Возвращает юзера.
     //Кидает исключения: NoAccessException, NotFoundException, UnidentifiedException
@@ -34,15 +32,30 @@ public class UserCoreController {
         return ObjectsController.castObject(req, UserObject.class);
     }
 
-    //Возвращает вновь созданного юзера.
-    //Кидает исключения: NoAccessException, InvalidParametersException, UnidentifiedException
-    public static UserObject createUser(String token, int idGroup, String name, String sName) throws ApiException {
+    /**
+     * Создает нового пользователя в ядре
+     *
+     * @param token токен в ядре
+     * @param name имя
+     * @param sName фамилия
+     * @param email почта
+     * @param login логин
+     * @param idGroup новая группа
+     * @return id в ядре
+     *
+     * @throws NoAccessException
+     * @throws UnidentifiedException
+     * @throws InvalidParametersException
+     */
+    public static UserObject register(String token, String name, String sName, String email, String login, int idGroup) throws ApiException {
         ApiObject req = CoreController.execute("user/register",
                 new HttpGetParameter()
                         .add("token", token)
                         .add("id_group", String.valueOf(idGroup))
                         .add("name", name)
                         .add("s_name", sName)
+                        .add("email", email)
+                        .add("login", login)
         );
         ObjectsController.ifExceptionThrow(req);
 
@@ -73,4 +86,31 @@ public class UserCoreController {
         return message.getMessage();
     }
 
+    public static boolean hasLogin(String token, String login) {
+        try {
+            ApiObject req = CoreController.execute("user/info/get", new HttpGetParameter()
+                    .add("token", token)
+                    .add("login", login));
+            ObjectsController.ifExceptionThrow(req);
+        } catch (Exception e) {
+            LOG.error("Failed checked login.", e);
+            return false;
+        }
+
+        return true;
+    }
+
+    public static boolean hasEmail(String token, String email) {
+        try {
+            ApiObject req = CoreController.execute("user/info/get", new HttpGetParameter()
+                    .add("token", token)
+                    .add("email", email));
+            ObjectsController.ifExceptionThrow(req);
+        } catch (Exception e) {
+            LOG.error("Failed checked email.", e);
+            return false;
+        }
+
+        return true;
+    }
 }

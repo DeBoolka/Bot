@@ -1,6 +1,5 @@
-package dikanev.nikita.bot.controller.groups;
+package dikanev.nikita.bot.logic.connector.core;
 
-import com.google.gson.Gson;
 import dikanev.nikita.bot.api.exceptions.ApiException;
 import dikanev.nikita.bot.api.objects.AccessGroupObject;
 import dikanev.nikita.bot.api.objects.ApiObject;
@@ -20,14 +19,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class AccessGroupCoreController {
-    private static final Logger LOG = LoggerFactory.getLogger(AccessGroupCoreController.class);
+public class AccessGroupCoreConnector {
+    private static final Logger LOG = LoggerFactory.getLogger(AccessGroupCoreConnector.class);
 
-    private static AccessGroupCoreController ourInstance = new AccessGroupCoreController();
+    private static AccessGroupCoreConnector ourInstance = new AccessGroupCoreConnector();
 
     private PreparedStatement prStatement;
 
-    public static AccessGroupCoreController getInstance() {
+    public static AccessGroupCoreConnector getInstance() {
         return ourInstance;
     }
 

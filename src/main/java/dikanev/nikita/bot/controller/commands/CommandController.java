@@ -20,19 +20,19 @@ public class CommandController {
 
     //Создание команды
     public int createCurrentCommand(int idUser, String args, int idCommand) throws SQLException{
-        return CommandDBConnector.getInstance().createCurrentCommand(idUser, args, idCommand);
+        return CommandDBConnector.createCurrentCommand(idUser, args, idCommand);
     }
 
     //Возвращает текущий id команды (id_command) и текущие аргументы (args)
     public Map<String, Object> getCurrentCommand(int userId) throws SQLException, ApiException {
-        return CommandDBConnector.getInstance().getCurrentCommand(userId);
+        return CommandDBConnector.getCurrentCommand(userId);
     }
 
     public boolean setArgs(int userId, String args) throws SQLException {
-        return CommandDBConnector.getInstance().setArgs(userId, args);
+        return CommandDBConnector.setArgs(userId, args);
     }
 
     public boolean setCurrentCommand(int idUser, String args, int idCommand) throws SQLException {
-        return CommandDBConnector.getInstance().setCurrentCommand(idUser, args, idCommand);
+        return CommandDBConnector.setCurrentCommand(idUser, args, idCommand);
     }
 }

@@ -10,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.Map;
 
 public class CoreController {
 
@@ -27,17 +26,16 @@ public class CoreController {
 
     public static ApiObject executeHandle(String command, CoreResponseClient response) throws ApiException {
         try {
-            if (response.getStatusCode() == 200) {
-                return ObjectsController.getApiObject(response.getContent());
-            }
+            LOG.debug("Response: " + response.getStatusCode() + " | " +
+                    response.getContent() + " | " +
+                    response.getHeaders());
+            return ObjectsController.getApiObject(response.getContent());
         } catch (NotFoundException e) {
+            LOG.error("Command not found.", e);
             throw new NotFoundException("Команда временно недостпна");
         } catch (InvalidParametersException e) {
             throw new InvalidParametersException("Команда временно недостпна");
         }
-
-        LOG.warn("Invalid response from the server: ", response.getStatusCode(), response.getHeaders(), response.getContent());
-        throw new UnidentifiedException("Команда временно недостпна");
     }
 
 }

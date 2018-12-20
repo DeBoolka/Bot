@@ -23,10 +23,12 @@ public class Application {
 
         registerShutdownHook();
 
+        LOG.info("Start init");
+
         init();
 
         LOG.info("Start application");
-//        start();
+        start();
 
         LOG.info("Stop application");
     }

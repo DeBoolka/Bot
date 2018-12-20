@@ -72,19 +72,7 @@ public class MessagesHandler {
         try {
             currentDataCommand = CommandController.getInstance().getCurrentCommand(message.getUserId());
         } catch (NotFoundException e) {
-            List<UserXtrCounters> users = VkClientStorage.getInstance().vk().users()
-                    .get(DataStorage.getInstance().getActor())
-                    .userIds(String.valueOf(message.getUserId()))
-                    .execute();
-            if (users == null || users.size() == 0) {
-                throw new NotFoundException("Users not found from vk");
-            }
-
-            UserXtrCounters user = users.get(0);
-            UserController.getInstance().createUser(
-                    CoreClientStorage.getInstance().getToken(), message.getUserId(), user.getFirstName(), user.getLastName()
-            );
-
+            UserController.getInstance().createUser(message.getUserId());
             currentDataCommand = CommandController.getInstance().getCurrentCommand(message.getUserId());
         }
 

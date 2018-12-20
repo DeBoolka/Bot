@@ -3,10 +3,7 @@ package dikanev.nikita.bot.controller.objects;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import dikanev.nikita.bot.api.exceptions.*;
-import dikanev.nikita.bot.api.objects.ApiObject;
-import dikanev.nikita.bot.api.objects.ApiObjects;
-import dikanev.nikita.bot.api.objects.ArrayObject;
-import dikanev.nikita.bot.api.objects.ExceptionObject;
+import dikanev.nikita.bot.api.objects.*;
 import dikanev.nikita.bot.api.objects.deserialization.ArrayJsonAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +23,11 @@ public class ObjectsController {
             throw new InvalidParametersException("Not a valid ApiObject");
         }
 
-        return gson.fromJson(objectString, ApiObjects.getObjectClass(object.getType()));
+        Class<? extends ApiObject> clazz = ApiObjects.getObjectClass(object.getType());
+        if (clazz != null) {
+            return gson.fromJson(objectString, clazz);
+        }
+        return new JsonObject(objectString);
     }
 
     private static Gson getGson() {
