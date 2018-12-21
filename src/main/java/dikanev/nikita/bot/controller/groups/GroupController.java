@@ -24,11 +24,6 @@ public class GroupController {
         return GroupDBConnector.createGroup(name);
     }
 
-    //Создание группы
-    public int createGroup(String name, int id) throws SQLException {
-        return GroupDBConnector.createGroup(name, id);
-    }
-
     //Удаление группы
     public boolean deleteGroup(int idGroup) throws SQLException {
         return GroupDBConnector.deleteGroup(idGroup);

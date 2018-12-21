@@ -4,6 +4,7 @@ import dikanev.nikita.bot.api.exceptions.ApiException;
 import dikanev.nikita.bot.logic.connector.db.commands.CommandDBConnector;
 import dikanev.nikita.bot.logic.connector.core.UserCoreConnector;
 import dikanev.nikita.bot.logic.callback.VkCommands;
+import dikanev.nikita.bot.service.client.SQLRequest;
 import dikanev.nikita.bot.service.storage.DBStorage;
 import dikanev.nikita.bot.service.storage.clients.CoreClientStorage;
 import org.slf4j.Logger;
@@ -20,12 +21,16 @@ public class UserDBConnector {
     public static boolean setCoreIdAndToken(int userIdInBot, int id, String userToken) throws SQLException {
         String sql = "UPDATE users SET id_core = ?, token = ? WHERE id = ?";
 
-        PreparedStatement prStatement = DBStorage.getInstance().getConnection().prepareStatement(sql);
-        prStatement.setInt(1, id);
-        prStatement.setString(2, userToken);
-        prStatement.setInt(3, userIdInBot);
-        int countUpdate = prStatement.executeUpdate();
-        prStatement.close();
+        SQLRequest req = new SQLRequest(DBStorage.getInstance().getConnection())
+                .build(sql)
+                .set(
+                        p -> p.setInt(1, id),
+                        p -> p.setString(2, userToken),
+                        p -> p.setInt(3, userIdInBot)
+                );
+
+        int countUpdate = req.executeUpdate();
+        req.close();
 
         if (countUpdate == 0) {
             LOG.warn("Failed to create coreId (" + id + ") and token (" + userToken + "). ");
@@ -42,12 +47,16 @@ public class UserDBConnector {
         String sql = "INSERT INTO users(id, id_core, token) " +
                 "VALUES (?, ?, ?)";
 
-        PreparedStatement prStatement = DBStorage.getInstance().getConnection().prepareStatement(sql);
-        prStatement.setInt(1, id);
-        prStatement.setNull(2, Types.INTEGER);
-        prStatement.setNull(3, Types.CHAR);
-        int countUpdate = prStatement.executeUpdate();
-        prStatement.close();
+        SQLRequest req = new SQLRequest(DBStorage.getInstance().getConnection())
+                .build(sql)
+                .set(
+                        p -> p.setInt(1, id),
+                        p -> p.setNull(2, Types.INTEGER),
+                        p -> p.setNull(3, Types.CHAR)
+                );
+
+        int countUpdate = req.executeUpdate();
+        req.close();
 
         if (countUpdate == 0) {
             LOG.warn("Failed to create a user with id: " + id);
@@ -65,10 +74,13 @@ public class UserDBConnector {
                 "WHERE id = ? " +
                 "LIMIT 1";
 
-        PreparedStatement prStatement = DBStorage.getInstance().getConnection().prepareStatement(sql);
-        prStatement.setInt(1, idUser);
-        int countDelete = prStatement.executeUpdate();
-        prStatement.close();
+        SQLRequest req = new SQLRequest(DBStorage.getInstance().getConnection())
+                .build(sql)
+                .set(p -> p.setInt(1, idUser));
+
+        int countDelete;
+        countDelete = req.executeUpdate();
+        req.close();
 
         if (countDelete == 0) {
             LOG.warn("Failed to delete user with id: " + idUser);
@@ -86,10 +98,10 @@ public class UserDBConnector {
                 "WHERE id_user = ? " +
                 "LIMIT 1";
 
-        PreparedStatement prStatement = DBStorage.getInstance().getConnection().prepareStatement(sql);
-        prStatement.setInt(1, idUser);
-        prStatement.executeUpdate();
-        prStatement.close();
+        SQLRequest req = new SQLRequest(DBStorage.getInstance().getConnection())
+                .build(sql).set(p -> p.setInt(1, idUser));
+        req.executeUpdate();
+        req.close();
 
         return true;
     }
@@ -102,10 +114,12 @@ public class UserDBConnector {
                 "   LEFT JOIN graph ON usr.id = graph.id_user WHERE usr.id = ? " +
                 "LIMIT 1";
 
-        PreparedStatement prStatement = DBStorage.getInstance().getConnection().prepareStatement(sql);
-        prStatement.setInt(1, id);
-        prStatement.setInt(2, id);
-        ResultSet res = prStatement.executeQuery();
+        ResultSet res = new SQLRequest(DBStorage.getInstance().getConnection())
+                .build(sql)
+                .set(
+                        p -> p.setInt(1, id),
+                        p -> p.setInt(2, id)
+                ).executeQuery();
 
         Map<String, Object> resMap = new HashMap<>();
         while (res.next()) {
@@ -126,9 +140,8 @@ public class UserDBConnector {
                 "WHERE id = ? " +
                 "LIMIT 1;";
 
-        PreparedStatement prStatement = DBStorage.getInstance().getConnection().prepareStatement(sql);
-        prStatement.setInt(1, id);
-        ResultSet res = prStatement.executeQuery();
+        ResultSet res = new SQLRequest(DBStorage.getInstance().getConnection())
+                .build(sql).set(p -> p.setInt(1, id)).executeQuery();
 
         int idCore = -1;
         while (res.next()) {
@@ -146,9 +159,8 @@ public class UserDBConnector {
                 "WHERE id = ? " +
                 "LIMIT 1;";
 
-        PreparedStatement prStatement = DBStorage.getInstance().getConnection().prepareStatement(sql);
-        prStatement.setInt(1, id);
-        ResultSet res = prStatement.executeQuery();
+        ResultSet res = new SQLRequest(DBStorage.getInstance().getConnection())
+                .build(sql).set(p -> p.setInt(1, id)).executeQuery();
 
         String token = null;
         int idCore = -1;
