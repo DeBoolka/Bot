@@ -89,7 +89,7 @@ public class EntryBotCommand extends VkCommand {
             }
 
             sendMessage("Очень приятно " + name + "!", cmdResp.getIdUser());
-            args.add("layers", "1").add("name", name);
+            args.add("layers", "1").set("name", name);
             return cmdResp.setInit();
         }
 
@@ -120,7 +120,7 @@ public class EntryBotCommand extends VkCommand {
                 return cmdResp.finish();
             }
 
-            args.add("layers", "2").add("s_name", sname);
+            args.add("layers", "2").set("s_name", sname);
             return cmdResp.setInit();
         }
 
@@ -156,7 +156,7 @@ public class EntryBotCommand extends VkCommand {
                 return cmdResp.finish();
             }
 
-            args.add("layers", "3").add("email", email);
+            args.add("layers", "3").set("email", email);
             return cmdResp.setInit();
         }
 
@@ -191,7 +191,7 @@ public class EntryBotCommand extends VkCommand {
                 return cmdResp.finish();
             }
 
-            args.add("layers", "4").add("login", login);
+            args.add("layers", "4").set("login", login);
             return cmdResp.setInit();
         }
 

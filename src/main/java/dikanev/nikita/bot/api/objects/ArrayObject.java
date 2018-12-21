@@ -1,50 +1,60 @@
 package dikanev.nikita.bot.api.objects;
 
-import dikanev.nikita.bot.api.objects.ApiObject;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class ArrayObject extends ApiObject {
 
-    private String typeObjects;
+    private Gson gson = new Gson();
 
-    private List<ApiObject> objects = new ArrayList<>();
+    private String typeObjects = null;
 
-    public ArrayObject(String typeObjects, List<ApiObject> objects) {
+    private JsonArray objects;
+
+    private ArrayObject() {
         super("array");
-
-        this.typeObjects = typeObjects;
-        this.objects = objects;
     }
 
-    public ArrayObject(String typeObjects) {
-        super("array");
+    public static ArrayObject empty(){
+        return new ArrayObject();
+    }
 
-        this.typeObjects = typeObjects;
+    @Override
+    public void init(JsonElement js) {
+        if (js.isJsonObject()) {
+            JsonObject obj = js.getAsJsonObject();
+            if (obj.has("typeObjects")) {
+                typeObjects = obj.get("typeObjects").getAsString();
+            }
+
+            if (obj.has("objects")) {
+                objects = obj.get("objects").getAsJsonArray();
+            }
+        }
     }
 
     public String getTypeObjects() {
         return typeObjects;
     }
 
-    public List<ApiObject> getObjects() {
+    public JsonArray getObjects() {
         return objects;
     }
 
-    public void setObjects(List<ApiObject> objects) {
-        this.objects = objects;
+    public List<JsonElement> toList() {
+        List<JsonElement> lst = new ArrayList<>();
+        objects.forEach(lst::add);
+        return lst;
     }
 
-    public void add(ApiObject object) {
-        objects.add(object);
-    }
-
-    public void add(List<ApiObject> objects) {
-        objects.addAll(objects);
-    }
-
-    public ApiObject get(int index) {
-        return objects.get(index);
+    public <T> List<T> toList(Class<T> clazz) {
+        List<T> lst = new ArrayList<>();
+        objects.forEach(it -> lst.add(gson.fromJson(it, clazz)));
+        return lst;
     }
 }

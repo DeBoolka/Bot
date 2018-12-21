@@ -1,7 +1,7 @@
 package dikanev.nikita.bot.logic.connector.core;
 
 import dikanev.nikita.bot.api.exceptions.*;
-import dikanev.nikita.bot.api.objects.ApiObject;
+import dikanev.nikita.bot.api.objects.JObject;
 import dikanev.nikita.bot.api.objects.MessageObject;
 import dikanev.nikita.bot.api.objects.UserObject;
 import dikanev.nikita.bot.controller.core.CoreController;
@@ -22,14 +22,14 @@ public class UserCoreConnector {
                 .add("token", token)
                 .add("id", String.valueOf(id));
 
-        ApiObject req = CoreController.execute("user/get"
+        JObject req = CoreController.execute("user/get"
                 , new HttpGetParameter()
                         .add("token", token)
                         .add("id", String.valueOf(id))
         );
         ObjectsController.ifExceptionThrow(req);
 
-        return ObjectsController.castObject(req, UserObject.class);
+        return req.build(UserObject.empty());
     }
 
     /**
@@ -48,7 +48,7 @@ public class UserCoreConnector {
      * @throws InvalidParametersException
      */
     public static UserObject register(String token, String name, String sName, String email, String login, int idGroup) throws ApiException {
-        ApiObject req = CoreController.execute("user/register",
+        JObject req = CoreController.execute("user/register",
                 new HttpGetParameter()
                         .add("token", token)
                         .add("id_group", String.valueOf(idGroup))
@@ -59,39 +59,41 @@ public class UserCoreConnector {
         );
         ObjectsController.ifExceptionThrow(req);
 
-        return ObjectsController.castObject(req, UserObject.class);
+        return req.build(UserObject.empty());
     }
 
     //Удаляет юзера.
     public static boolean deleteUser(String token, int id) throws ApiException {
-        ApiObject req = CoreController.execute("user/delete", new HttpGetParameter()
+        JObject req = CoreController.execute("user/delete", new HttpGetParameter()
                 .add("token", token)
                 .add("id", String.valueOf(id)));
 
         ObjectsController.ifExceptionThrow(req);
-        MessageObject message = ObjectsController.castObject(req, MessageObject.class);
+        MessageObject message = req.build(MessageObject.empty());
 
         return message.getMessage().equals("Ok");
     }
 
     //Получает токен юзера.
     public static String getToken(String token, int id) throws ApiException {
-        ApiObject req = CoreController.execute("user/create/token", new HttpGetParameter()
+        JObject req = CoreController.execute("user/create/token", new HttpGetParameter()
                 .add("token", token)
                 .add("id", String.valueOf(id)));
 
         ObjectsController.ifExceptionThrow(req);
-        MessageObject message = ObjectsController.castObject(req, MessageObject.class);
+        MessageObject message = req.build(MessageObject.empty());
 
         return message.getMessage();
     }
 
     public static boolean hasLogin(String token, String login) {
         try {
-            ApiObject req = CoreController.execute("user/info/get", new HttpGetParameter()
+            JObject req = CoreController.execute("user/info/get", new HttpGetParameter()
                     .add("token", token)
                     .add("login", login));
             ObjectsController.ifExceptionThrow(req);
+        } catch (InvalidParametersException e) {
+            return false;
         } catch (Exception e) {
             LOG.error("Failed checked login.", e);
             return false;
@@ -102,10 +104,12 @@ public class UserCoreConnector {
 
     public static boolean hasEmail(String token, String email) {
         try {
-            ApiObject req = CoreController.execute("user/info/get", new HttpGetParameter()
+            JObject req = CoreController.execute("user/info/get", new HttpGetParameter()
                     .add("token", token)
                     .add("email", email));
             ObjectsController.ifExceptionThrow(req);
+        } catch (InvalidParametersException e) {
+            return false;
         } catch (Exception e) {
             LOG.error("Failed checked email.", e);
             return false;

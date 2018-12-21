@@ -58,6 +58,6 @@ public class AccessGroupController {
 
     //Возвращает доступность команд для группы
     public Map<String, Boolean> getAccessGroup(String token, int idGroup, List<String> commandsName) throws ApiException{
-        return AccessGroupCoreConnector.getInstance().getAccessGroup(token, idGroup, commandsName);
+        return AccessGroupCoreConnector.getAccessGroup(token, idGroup, commandsName);
     }
 }

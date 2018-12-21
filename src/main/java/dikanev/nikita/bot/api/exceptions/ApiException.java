@@ -1,9 +1,6 @@
 package dikanev.nikita.bot.api.exceptions;
 
 
-import dikanev.nikita.bot.api.objects.ApiObject;
-import dikanev.nikita.bot.api.objects.ExceptionObject;
-
 public class ApiException extends Exception {
 
     private String description;

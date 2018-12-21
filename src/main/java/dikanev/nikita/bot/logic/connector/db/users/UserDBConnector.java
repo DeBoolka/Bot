@@ -37,7 +37,7 @@ public class UserDBConnector {
             return false;
         }
 
-        CommandDBConnector.createCurrentCommand(id, "", VkCommands.ENTRY_BOT.ordinal());
+        CommandDBConnector.setCurrentCommand(userIdInBot, "", VkCommands.ENTRY_BOT.ordinal());
 
         return true;
     }
