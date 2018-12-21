@@ -1,11 +1,11 @@
 package dikanev.nikita.bot.logic.connector.db.commands;
 
 import dikanev.nikita.bot.api.exceptions.NotFoundException;
+import dikanev.nikita.bot.service.client.SQLRequest;
 import dikanev.nikita.bot.service.storage.DBStorage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -15,24 +15,17 @@ public class CommandDBConnector {
 
     private static final Logger LOG = LoggerFactory.getLogger(CommandDBConnector.class);
 
-    private static CommandDBConnector ourInstance = new CommandDBConnector();
-
-    private PreparedStatement prStatement;
-
-    public static CommandDBConnector getInstance() {
-        return ourInstance;
-    }
-
     //Создание команды
-    public int createCurrentCommand(int idUser, String args, int idCommand) throws SQLException {
-        String sql = "INSERT graph(id_user, args, id_command) VALUES (?, ?, ?)";
-
-        prStatement = DBStorage.getInstance().getConnection().prepareStatement(sql);
-        prStatement.setInt(1, idUser);
-        prStatement.setString(2, args);
-        prStatement.setInt(3, idCommand);
-        int res = prStatement.executeUpdate();
-        prStatement.close();
+    public static int createCurrentCommand(int idUser, String args, int idCommand) throws SQLException {
+        SQLRequest req = new SQLRequest(DBStorage.getInstance().getConnection())
+                .build("INSERT graph(id_user, args, id_command) VALUES (?, ?, ?)")
+                .set(
+                        p -> p.setInt(1, idUser),
+                        p -> p.setString(2, args),
+                        p -> p.setInt(3, idCommand)
+                );
+        int res = req.executeUpdate();
+        req.close();
 
         if (res == 0) {
             LOG.warn("Failed to create a command");
@@ -43,15 +36,14 @@ public class CommandDBConnector {
     }
 
     //Получение текущей позиции на графе
-    public Map<String, Object> getCurrentCommand(int userId) throws SQLException, NotFoundException {
-        String sql = "SELECT id_command, args " +
-                "FROM graph " +
-                "WHERE id_user = ? " +
-                "LIMIT 1";
-
-        prStatement = DBStorage.getInstance().getConnection().prepareStatement(sql);
-        prStatement.setInt(1, userId);
-        ResultSet res = prStatement.executeQuery();
+    public static Map<String, Object> getCurrentCommand(int userId) throws SQLException, NotFoundException {
+        ResultSet res = new SQLRequest(DBStorage.getInstance().getConnection())
+                .build("SELECT id_command, args " +
+                        "FROM graph " +
+                        "WHERE id_user = ? " +
+                        "LIMIT 1")
+                .set(p -> p.setInt(1, userId))
+                .executeQuery();
 
         int id = -1;
         String args = null;
@@ -69,17 +61,18 @@ public class CommandDBConnector {
     }
 
     //Устанавливает текущие аргументы
-    public boolean setArgs(int userId, String args) throws SQLException {
-        String sql = "UPDATE graph " +
-                "SET args = ? " +
-                "WHERE id_user = ? " +
-                "LIMIT 1";
+    public static boolean setArgs(int userId, String args) throws SQLException {
+        SQLRequest req = new SQLRequest(DBStorage.getInstance().getConnection())
+                .build("UPDATE graph " +
+                        "SET args = ? " +
+                        "WHERE id_user = ? " +
+                        "LIMIT 1")
+                .set(
+                        p -> p.setString(1, args),
+                        p -> p.setInt(2, userId));
 
-        prStatement = DBStorage.getInstance().getConnection().prepareStatement(sql);
-        prStatement.setString(1, args);
-        prStatement.setInt(2, userId);
-        int res = prStatement.executeUpdate();
-        prStatement.close();
+        int res = req.executeUpdate();
+        req.close();
 
         if (res == 0) {
             createCurrentCommand(userId, args, 0);
@@ -89,18 +82,20 @@ public class CommandDBConnector {
     }
 
     //Устанавливает текущую команду
-    public boolean setCurrentCommand(int idUser, String args, int idCommand) throws SQLException {
-        String sql = "UPDATE graph " +
-                "SET args = ?, id_command = ? " +
-                "WHERE id_user = ? " +
-                "LIMIT 1";
+    public static boolean setCurrentCommand(int idUser, String args, int idCommand) throws SQLException {
+        SQLRequest req = new SQLRequest(DBStorage.getInstance().getConnection())
+                .build("UPDATE graph " +
+                        "SET args = ?, id_command = ? " +
+                        "WHERE id_user = ? " +
+                        "LIMIT 1")
+                .set(
+                        p -> p.setString(1, args),
+                        p -> p.setInt(2, idCommand),
+                        p -> p.setInt(3, idUser)
+                );
 
-        prStatement = DBStorage.getInstance().getConnection().prepareStatement(sql);
-        prStatement.setString(1, args);
-        prStatement.setInt(2, idCommand);
-        prStatement.setInt(3, idUser);
-        int res = prStatement.executeUpdate();
-        prStatement.close();
+        int res = req.executeUpdate();
+        req.close();
 
         if (res == 0) {
             createCurrentCommand(idUser, args, idCommand);

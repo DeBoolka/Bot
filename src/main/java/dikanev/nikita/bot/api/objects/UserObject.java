@@ -1,14 +1,21 @@
 package dikanev.nikita.bot.api.objects;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+
 public class UserObject extends ApiObject {
 
-    private int id;
+    private int id = 0;
 
-    private int idGroup;
+    private int idGroup = 0;
 
-    private String sName;
+    private String sName = null;
 
-    private String name;
+    private String name = null;
+
+    private UserObject() {
+        super("user");
+    }
 
     public UserObject(int id, int idGroup, String sName, String name) {
         super("user");
@@ -19,35 +26,43 @@ public class UserObject extends ApiObject {
         this.name = name;
     }
 
-    public int getId() {
-        return id;
+    public static UserObject empty() {
+        return new UserObject();
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public int getId() {
+        return id;
     }
 
     public int getIdGroup() {
         return idGroup;
     }
 
-    public void setIdGroup(int idGroup) {
-        this.idGroup = idGroup;
-    }
-
     public String getsName() {
         return sName;
     }
 
-    public void setsName(String sName) {
-        this.sName = sName;
-    }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    @Override
+    public void init(JsonElement js) {
+        if (js.isJsonObject()) {
+            JsonObject root = js.getAsJsonObject();
+            if (root.has("id")) {
+                id = root.get("id").getAsInt();
+            }
+            if (root.has("idGroup")) {
+                idGroup = root.get("idGroup").getAsInt();
+            }
+            if (root.has("sName")) {
+                sName = root.get("sName").getAsString();
+            }
+            if (root.has("name")) {
+                name = root.get("name").getAsString();
+            }
+        }
     }
 }

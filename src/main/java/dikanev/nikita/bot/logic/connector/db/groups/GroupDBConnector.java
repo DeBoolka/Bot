@@ -1,10 +1,10 @@
 package dikanev.nikita.bot.logic.connector.db.groups;
 
+import dikanev.nikita.bot.service.client.SQLRequest;
 import dikanev.nikita.bot.service.storage.DBStorage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -13,22 +13,14 @@ public class GroupDBConnector {
 
     private static final Logger LOG = LoggerFactory.getLogger(GroupDBConnector.class);
 
-    private static GroupDBConnector ourInstance = new GroupDBConnector();
-
-    private PreparedStatement prStatement;
-
-    public static GroupDBConnector getInstance() {
-        return ourInstance;
-    }
-
     //Создание группы
-    public int createGroup(String name) throws SQLException {
-        String sql = "INSERT groups(id, name) VALUES (NULL, ?)";
+    public static int createGroup(String name) throws SQLException {
+        SQLRequest req = new SQLRequest(DBStorage.getInstance().getConnection())
+                .build("INSERT groups(id, name) VALUES (NULL, ?)")
+                .set(p -> p.setString(1, name));
 
-        prStatement = DBStorage.getInstance().getConnection().prepareStatement(sql);
-        prStatement.setString(1, name);
-        int res = prStatement.executeUpdate();
-        prStatement.close();
+        int res = req.executeUpdate();
+        req.close();
 
         if (res == 0) {
             LOG.warn("Failed to create a group with the name: " + name);
@@ -38,34 +30,18 @@ public class GroupDBConnector {
         return getLastId();
     }
 
-    //Создание группы
-    public int createGroup(String name, int id) throws SQLException {
-        String sql = "INSERT groups(id, name) VALUES (?, ?)";
-
-        prStatement = DBStorage.getInstance().getConnection().prepareStatement(sql);
-        prStatement.setInt(1, id);
-        prStatement.setString(2, name);
-        int res = prStatement.executeUpdate();
-        prStatement.close();
-
-        if (res == 0) {
-            LOG.warn("Failed to create a group with the name: " + name);
-            throw new IllegalStateException("Failed to create a group with the name: " + name);
-        }
-
-        return id;
-    }
-
     //Удаление группы
-    public boolean deleteGroup(int idGroup) throws SQLException {
+    public static boolean deleteGroup(int idGroup) throws SQLException {
         String sql = "DELETE FROM groups " +
                 "WHERE id = ? " +
                 "LIMIT 1";
 
-        prStatement = DBStorage.getInstance().getConnection().prepareStatement(sql);
-        prStatement.setInt(1, idGroup);
-        int countDelete = prStatement.executeUpdate();
-        prStatement.close();
+        SQLRequest req = new SQLRequest(DBStorage.getInstance().getConnection())
+                .build(sql)
+                .set(p -> p.setInt(1, idGroup));
+
+        int countDelete = req.executeUpdate();
+        req.close();
 
         if (countDelete == 0) {
             LOG.warn("Failed to delete group with id: " + idGroup);
@@ -75,32 +51,27 @@ public class GroupDBConnector {
         sql = "DELETE FROM groups_privilege " +
                 "WHERE id_group = ? ";
 
-        prStatement = DBStorage.getInstance().getConnection().prepareStatement(sql);
-        prStatement.setInt(1, idGroup);
-        prStatement.executeUpdate();
-        prStatement.close();
+        req.build(sql).set(p -> p.setInt(1, idGroup)).executeUpdate();
+        req.close();
 
         sql = "UPDATE users SET id_group = 3 " +
                 "WHERE id_group = ?";
 
-        prStatement = DBStorage.getInstance().getConnection().prepareStatement(sql);
-        prStatement.setInt(1, idGroup);
-        prStatement.executeUpdate();
-        prStatement.close();
+        req.build(sql).set(p -> p.setInt(1, idGroup)).executeUpdate();
+        req.close();
 
         return true;
     }
 
     //Получение имени группы
-    public String getName(int idGroup) throws SQLException {
-        String sql = "SELECT name " +
-                "FROM groups " +
-                "WHERE id = ? " +
-                "LIMIT 1;";
-
-        prStatement = DBStorage.getInstance().getConnection().prepareStatement(sql);
-        prStatement.setInt(1, idGroup);
-        ResultSet res = prStatement.executeQuery();
+    public static String getName(int idGroup) throws SQLException {
+        ResultSet res =  new SQLRequest(DBStorage.getInstance().getConnection())
+                .build("SELECT name " +
+                        "FROM groups " +
+                        "WHERE id = ? " +
+                        "LIMIT 1;")
+                .set(p -> p.setInt(1, idGroup))
+                .executeQuery();
 
         String nameGroup = null;
         while (res.next()) {
@@ -112,7 +83,7 @@ public class GroupDBConnector {
     }
 
     //Получение последнего вставленного id
-    private int getLastId() throws SQLException{
+    private static int getLastId() throws SQLException{
         String sql = "SELECT LAST_INSERT_ID() AS id";
         int lastId = -1;
         Statement statement = DBStorage.getInstance().getConnection().createStatement();

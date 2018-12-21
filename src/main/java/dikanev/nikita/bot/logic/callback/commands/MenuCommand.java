@@ -46,7 +46,8 @@ public class MenuCommand extends VkCommandHandler {
     protected Map<String, CommandData> getCommands(CommandResponse cmdResp, Parameter args) {
             return new LinkedHashMap<>(Map.of(
                     "bot/vk/admin/", new CommandData("Админ", " - Меню администратора", true, (resp, data, commands) ->
-                            cmdResp.setArgs("").setIdCommand(VkCommands.ADMIN_MENU.id()).setInit()
+//                            cmdResp.setArgs("").setIdCommand(VkCommands.ADMIN_MENU.id()).setInit()
+                            unrealizedOperation(cmdResp)
                     ),
                     "bot/vk/game/", new CommandData("Игры", " - Меню игр", true, (resp, data, commands) ->
                             unrealizedOperation(cmdResp)
