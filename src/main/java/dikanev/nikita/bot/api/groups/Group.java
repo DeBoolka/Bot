@@ -12,9 +12,9 @@ public class Group {
 
     private static final Logger LOG = LoggerFactory.getLogger(Group.class);
 
-    private int id;
+    public int id;
 
-    private String name;
+    public String name;
 
     public Group(int id) {
         this.id = id;
@@ -25,6 +25,8 @@ public class Group {
         this.id = id;
         this.name = name;
     }
+
+
 
     @Override
     public boolean equals(Object obj) {

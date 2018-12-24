@@ -4,7 +4,7 @@ import com.google.gson.JsonElement;
 
 public abstract class ApiObject {
 
-    String type;
+    private String type;
 
     protected ApiObject(String type) {
         this.type = type;

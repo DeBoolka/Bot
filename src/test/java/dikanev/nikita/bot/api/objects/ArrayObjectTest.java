@@ -14,9 +14,9 @@ class ArrayObjectTest {
     @Test
     void toArray() {
         String body = "{\"typeObjects\":\"accessGroup\",\"objects\":[{\"idGroup\":2,\"command\":\"group/create\",\"access\":true,\"type\":\"accessGroup\"},{\"idGroup\":2,\"command\":\"group/delete\",\"access\":true,\"type\":\"accessGroup\"},{\"idGroup\":2,\"command\":\"group/access\",\"access\":false,\"type\":\"accessGroup\"}],\"type\":\"array\"}";
-        assertDoesNotThrow(() -> new JObject(body).build(ArrayObject.empty()));
+        assertDoesNotThrow(() -> new JObject(body).cast(ArrayObject.empty()));
 
-        ArrayObject arrObj = new JObject(body).build(ArrayObject.empty());
+        ArrayObject arrObj = new JObject(body).cast(ArrayObject.empty());
         List<AccessCommand> lst = new ArrayList<>();
         arrObj.toList().forEach(it ->{
             JsonObject root = it.getAsJsonObject();
@@ -36,9 +36,9 @@ class ArrayObjectTest {
     @Test
     void toArray1() {
         String body = "{\"typeObjects\":\"int\",\"objects\":[1, 2, 3],\"type\":\"array\"}";
-        assertDoesNotThrow(() -> new JObject(body).build(ArrayObject.empty()));
+        assertDoesNotThrow(() -> new JObject(body).cast(ArrayObject.empty()));
 
-        ArrayObject arrObj = new JObject(body).build(ArrayObject.empty());
+        ArrayObject arrObj = new JObject(body).cast(ArrayObject.empty());
         assertEquals(arrObj.toList(Integer.class), List.of(1, 2, 3));
     }
 

@@ -10,7 +10,7 @@ import java.util.List;
 
 public class ArrayObject extends ApiObject {
 
-    private Gson gson = new Gson();
+    private static Gson gson = new Gson();
 
     private String typeObjects = null;
 

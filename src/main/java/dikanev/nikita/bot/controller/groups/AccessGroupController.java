@@ -28,7 +28,7 @@ public class AccessGroupController {
     public boolean hasAccessUser(String token, int idUser, String commandName) throws ApiException, SQLException {
         UserObject user;
         try {
-            user = UserController.getInstance().getUser(CoreClientStorage.getInstance().getToken(), idUser);
+            user = UserController.getUser(CoreClientStorage.getInstance().getToken(), idUser);
         } catch (ApiException | SQLException e) {
             LOG.warn("Could not get user.", e);
             throw e;
@@ -47,7 +47,7 @@ public class AccessGroupController {
     public Map<String, Boolean> getAccessUser(String token, int idUser, List<String> commandsName) throws ApiException, SQLException{
         UserObject user;
         try {
-            user = UserController.getInstance().getUser(CoreClientStorage.getInstance().getToken(), idUser);
+            user = UserController.getUser(CoreClientStorage.getInstance().getToken(), idUser);
         } catch (ApiException | SQLException e) {
             LOG.warn("Could not get user.", e);
             throw e;
