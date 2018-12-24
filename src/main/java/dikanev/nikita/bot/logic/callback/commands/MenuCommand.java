@@ -1,12 +1,17 @@
 package dikanev.nikita.bot.logic.callback.commands;
 
+import dikanev.nikita.bot.api.exceptions.InvalidParametersException;
+import dikanev.nikita.bot.api.groups.Group;
+import dikanev.nikita.bot.controller.users.UserController;
 import dikanev.nikita.bot.logic.callback.CommandResponse;
 import dikanev.nikita.bot.logic.callback.VkCommands;
 import dikanev.nikita.bot.service.client.parameter.Parameter;
+import dikanev.nikita.bot.service.storage.clients.CoreClientStorage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.function.Consumer;
 
 public class MenuCommand extends VkCommandHandler {
 
@@ -26,6 +31,11 @@ public class MenuCommand extends VkCommandHandler {
 
     @Override
     public CommandResponse handle(CommandResponse cmdResp, Parameter args) throws Exception {
+        workerHandel(cmdResp, args);
+        if (args.get("menu-block") != null && args.get("menu-block").size() > 0) {
+            return cmdResp.finish();
+        }
+
         Map<String, CommandData> commands = getCommands(cmdResp, cmdResp.getArgs());
         loadAccessCommands(cmdResp, args, commands);
 
@@ -46,8 +56,8 @@ public class MenuCommand extends VkCommandHandler {
     protected Map<String, CommandData> getCommands(CommandResponse cmdResp, Parameter args) {
             return new LinkedHashMap<>(Map.of(
                     "bot/vk/admin/", new CommandData("Админ", " - Меню администратора", true, (resp, data, commands) ->
-//                            cmdResp.setArgs("").setIdCommand(VkCommands.ADMIN_MENU.id()).setInit()
-                            unrealizedOperation(cmdResp)
+                            cmdResp.setArgs("").setIdCommand(VkCommands.ADMIN_MENU.id()).setInit()
+//                            unrealizedOperation(cmdResp)
                     ),
                     "bot/vk/game/", new CommandData("Игры", " - Меню игр", true, (resp, data, commands) ->
                             unrealizedOperation(cmdResp)
@@ -55,14 +65,48 @@ public class MenuCommand extends VkCommandHandler {
                     "bot/vk/team/", new CommandData("Команды", " - Меню команд (team)", true, (resp, data, commands) ->
                             unrealizedOperation(cmdResp)
                     ),
-                    "bot/vk/invite/", new CommandData("Пригласительный", " - Ввод пригласительного", true, (resp, data, commands) ->
-                            unrealizedOperation(cmdResp)
-                    ),
+                    "bot/vk/invite/apply", new CommandData("Пригласительный", " - Ввод пригласительного", true, (resp, data, commands) -> {
+                        addWorker(args, "apply-invite");
+                        sendMessage("Введите ваш инвайт код.", cmdResp.getIdUser());
+                        return resp.finish();
+                    }),
                     "help", new CommandData("help",true, "- Выводит список команд", (resp, data, commands) -> {
                         cmdResp.getArgs().set("message", helpCommand(commands));
                         return cmdResp.setInit();
                     })
             ));
+    }
+
+    protected void addWorker(Parameter args, String workerName) {
+        args.add("worker", workerName);
+    }
+
+    protected void addWorker(Parameter args, String workerName, String nameBlock) {
+        args.add("worker", workerName);
+        if (nameBlock != null) {
+            args.add("menu-block", nameBlock);
+        }
+    }
+
+    private void workerHandel(CommandResponse resp, Parameter param) {
+        List<Worker> workers = initWorkers(resp, param);
+        List<String> workersParam = param.get("worker");
+        if (workersParam == null) {
+            return;
+        }
+
+        workers.forEach(it -> {
+            if (workersParam.contains(it.name)) {
+                it.work.accept(resp);
+            }
+        });
+    }
+
+    protected List<Worker> initWorkers(CommandResponse resp, Parameter param) {
+        List<Worker> workers = new ArrayList<>();
+        workers.add(new Worker("apply-invite", it -> applyInvite(resp, resp.getText())));
+
+        return workers;
     }
 
     @Override
@@ -79,5 +123,38 @@ public class MenuCommand extends VkCommandHandler {
             }
         });
         return helpMessage.toString();
+    }
+
+    private void applyInvite(CommandResponse resp, String invite) {
+        resp.getArgs().remove("worker", "apply-invite");
+        if (invite == null) {
+            return;
+        }
+
+        int userId = resp.getIdUser();
+        try {
+            try {
+                Group group = UserController.applyInvite(CoreClientStorage.getInstance().getToken(), userId, invite);
+                sendMessage("Инвайт код успешно применен.\nВы теперь в группе: " + group.name, userId);
+            } catch (InvalidParametersException e) {
+                sendMessage("Инвайт код не найден.", userId);
+            } catch (Exception e) {
+                LOG.error(e.getMessage(), e);
+                sendMessage("Команда временно недоступна.", userId);
+            }
+        } catch (Exception e) {
+            LOG.error("Send message error: ", e);
+        }
+
+    }
+
+    protected class Worker{
+        String name;
+        Consumer<CommandResponse> work;
+
+        public Worker(String name, Consumer<CommandResponse> work) {
+            this.name = name;
+            this.work = work;
+        }
     }
 }

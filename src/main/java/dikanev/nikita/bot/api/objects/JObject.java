@@ -54,7 +54,7 @@ public class JObject {
         return type;
     }
 
-    public <T extends ApiObject> T build(@NonNullType T object) {
+    public <T extends ApiObject> T cast(@NonNullType T object) {
         object.init(element);
         return object;
     }

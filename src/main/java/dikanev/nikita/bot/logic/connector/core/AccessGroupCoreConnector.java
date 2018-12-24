@@ -32,7 +32,7 @@ public class AccessGroupCoreConnector {
         try {
             JObject resp = CoreController.execute("group/access/create", args);
             ObjectsController.ifExceptionThrow(resp);
-            msg = resp.build(MessageObject.empty());
+            msg = resp.cast(MessageObject.empty());
         } catch (ApiException e) {
             LOG.warn("Could not create access group: ", e);
             return false;
@@ -53,7 +53,7 @@ public class AccessGroupCoreConnector {
         JObject resp =  CoreController.execute("group/access/get", req);
         ObjectsController.ifExceptionThrow(resp);
 
-        ArrayObject arrayObject = resp.build(ArrayObject.empty());
+        ArrayObject arrayObject = resp.cast(ArrayObject.empty());
         final Map<String, Boolean> accessCommandMap = new HashMap<>();
         arrayObject.getObjects().forEach(e -> {
             JsonObject obj = e.getAsJsonObject();

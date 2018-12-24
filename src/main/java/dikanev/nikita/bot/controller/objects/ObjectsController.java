@@ -27,7 +27,7 @@ public class ObjectsController {
             return;
         }
 
-        ExceptionObject exObject = object.build(ExceptionObject.empty());
+        ExceptionObject exObject = object.cast(ExceptionObject.empty());
         int code = exObject.getCode();
 
         switch (code) {

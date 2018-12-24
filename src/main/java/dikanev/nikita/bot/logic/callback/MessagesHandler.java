@@ -72,7 +72,7 @@ public class MessagesHandler {
         try {
             currentDataCommand = CommandController.getInstance().getCurrentCommand(message.getUserId());
         } catch (NotFoundException e) {
-            UserController.getInstance().createUser(message.getUserId());
+            UserController.createUser(message.getUserId());
             currentDataCommand = CommandController.getInstance().getCurrentCommand(message.getUserId());
         }
 

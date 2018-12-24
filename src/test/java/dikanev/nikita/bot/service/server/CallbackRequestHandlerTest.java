@@ -19,9 +19,9 @@ class CallbackRequestHandlerTest {
         body = "{\"typeObjects\":\"int\",\"objects\":[1, 2, 3],\"type\":\"array\"}";
 
         String finalBody = body;
-        assertDoesNotThrow(() -> new JObject(finalBody).build(ArrayObject.empty()));
+        assertDoesNotThrow(() -> new JObject(finalBody).cast(ArrayObject.empty()));
 
-        ArrayObject arrObj = new JObject(finalBody).build(ArrayObject.empty());
+        ArrayObject arrObj = new JObject(finalBody).cast(ArrayObject.empty());
         assertEquals(arrObj.toList(Integer.class), List.of(1, 2, 3));
         assertDoesNotThrow((ThrowingSupplier<List<JsonElement>>) arrObj::toList);
 

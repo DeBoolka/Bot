@@ -2,8 +2,8 @@ package dikanev.nikita.bot.logic.callback.commands;
 
 import com.vk.api.sdk.exceptions.ApiException;
 import com.vk.api.sdk.exceptions.ClientException;
+import dikanev.nikita.bot.api.groups.Groups;
 import dikanev.nikita.bot.api.objects.UserObject;
-import dikanev.nikita.bot.api.users.User;
 import dikanev.nikita.bot.controller.users.UserController;
 import dikanev.nikita.bot.logic.connector.core.UserCoreConnector;
 import dikanev.nikita.bot.logic.callback.CommandResponse;
@@ -206,7 +206,7 @@ public class EntryBotCommand extends VkCommand {
                     , args.getF("s_name")
                     , args.getF("email")
                     , args.getF("login")
-                    , User.DEFAULT_GROUP);
+                    , Groups.DEFAULT_GROUP);
         } catch (Exception e) {
             LOG.warn("Error reg: ", e);
             sendMessage("Что-то пошло не так при регистрации.\n" +
