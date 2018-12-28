@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.util.Arrays;
@@ -233,7 +234,8 @@ public class CoreClient {
     private CoreResponseClient call(HttpUriRequest request) throws IOException {
         HttpResponse response = client.execute(request);
         try (InputStream content = response.getEntity().getContent()) {
-            String result = IOUtils.toString(content, ENCODING);
+//            String result = IOUtils.toString(content, ENCODING);
+            String result = new String(content.readAllBytes(), StandardCharsets.UTF_8);
             LOG.info(request.getURI().toString() + " " + response.getStatusLine().getStatusCode());
             return new CoreResponseClient(response.getStatusLine().getStatusCode(), result, getResponseHeaders(response.getAllHeaders()));
         }

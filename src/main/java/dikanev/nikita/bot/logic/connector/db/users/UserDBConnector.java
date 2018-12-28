@@ -108,7 +108,7 @@ public class UserDBConnector {
 
     //Получение информации о человеке.
     //Возвращает map с ключами: id, id_core, id_command, token, args
-    public static Map<String, Object> getData(int id) throws SQLException {
+    public static Map<String, Object> getSystemData(int id) throws SQLException {
         String sql = "SELECT usr.id, usr.id_core, usr.token, graph.args, graph.id_command " +
                 "FROM users AS usr " +
                 "   LEFT JOIN graph ON usr.id = graph.id_user WHERE usr.id = ? " +

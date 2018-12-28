@@ -32,7 +32,7 @@ public class ObjectsController {
 
         switch (code) {
             case 400:
-                throw new InvalidParametersException(exObject.getMessage());
+                throw new InvalidParametersException(exObject.getMessage(), 400);
 
             case 403:
                 throw new NoAccessException(exObject.getMessage());

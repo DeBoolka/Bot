@@ -1,4 +1,4 @@
-package dikanev.nikita.bot.logic.callback.commands.menus;
+package dikanev.nikita.bot.logic.callback.commands.menu;
 
 import dikanev.nikita.bot.api.groups.Group;
 import dikanev.nikita.bot.controller.users.UserController;
@@ -7,11 +7,11 @@ import dikanev.nikita.bot.logic.callback.VkCommands;
 import dikanev.nikita.bot.logic.callback.commands.MenuCommand;
 import dikanev.nikita.bot.service.client.parameter.Parameter;
 import dikanev.nikita.bot.service.storage.clients.CoreClientStorage;
-import org.apache.commons.collections4.map.LinkedMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -21,27 +21,30 @@ public class AdminMenuCommand extends MenuCommand {
 
     @Override
     protected Map<String, CommandData> getCommands(CommandResponse cmdResp, Parameter args) {
-        return new LinkedMap<>(Map.of(
-                "callback", new CommandData("callback", true, "- Callback menu", (resp, data, commands) ->
-                        cmdResp.setArgs("").setIdCommand(VkCommands.CALLBACK_TEST.id()).setInit()
-                ),"bot/vk/invite/create", new CommandData("create invite", "- Создает инвайт код", true, (resp, data, commands) -> {
-                    addWorker(args, "invite-create", "invite-create");
-                    sendMessage("Введите id группы.", cmdResp.getIdUser());
-                    return cmdResp.finish();
-                }),"bot/vk/group/update", new CommandData("change group", "- Изменяет группу пользователя", true, (resp, data, commands) -> {
-                    addWorker(args, "change-group", "change-group");
-                    sendMessage("Введите id пользователя.", cmdResp.getIdUser());
-                    return cmdResp.finish();
-                }),"help", new CommandData("help", true, "- Выводит список команд", (resp, data, commands) -> {
-                    args.set("message", helpCommand(commands));
-                    return cmdResp.setInit();
-                }),
-                "menu", new CommandData("menu", true, "- Возврат в главное меню", (resp, data, commands) ->
-                        cmdResp.setArgs("").setIdCommand(VkCommands.MENU.id()).setInit()
-                )
+        Map<String, CommandData> res = new LinkedHashMap<>();
 
+        res.put("callback", new CommandData("callback", true, "- Callback menu", (resp, data, commands) ->
+                cmdResp.setArgs("").setIdCommand(VkCommands.CALLBACK_TEST.id()).setInit()
+        ));
+        res.put("bot/vk/invite/create", new CommandData("create invite", "- Создает инвайт код", true, (resp, data, commands) -> {
+            addWorker(args, "invite-create", "invite-create");
+            sendMessage("Введите id группы.", cmdResp.getIdUser());
+            return cmdResp.finish();
+        }));
+        res.put("bot/vk/group/update", new CommandData("change group", "- Изменяет группу пользователя", true, (resp, data, commands) -> {
+            addWorker(args, "change-group", "change-group");
+            sendMessage("Введите id пользователя.", cmdResp.getIdUser());
+            return cmdResp.finish();
+        }));
+        res.put("help", new CommandData("help", true, "- Выводит список команд", (resp, data, commands) -> {
+            args.set("message", helpCommand(commands));
+            return cmdResp.setInit();
+        }));
+        res.put("menu", new CommandData("menu", true, "- Возврат в главное меню", (resp, data, commands) ->
+                cmdResp.setArgs("").setIdCommand(VkCommands.MENU.id()).setInit()
         ));
 
+        return res;
     }
 
     @Override

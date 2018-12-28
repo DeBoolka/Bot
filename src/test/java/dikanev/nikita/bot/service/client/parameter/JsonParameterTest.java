@@ -204,7 +204,10 @@ class JsonParameterTest {
         assertTrue(parameter.containsVal("k1", "v1"));
         assertTrue(parameter.containsVal("k2", "v2"));
         assertTrue(parameter.containsVal("k3", "3"));
-        assertTrue(parameter.containsVal("k3", "v3"));
+        assertTrue(parameter.containsVal("k3", "v3", "3"));
+        assertTrue(parameter.containsVal("k3", "3", "v3"));
+        assertTrue(parameter.containsVal("k3", "3", "v5"));
+        assertFalse(parameter.containsVal("k3", "5", "v5"));
         assertTrue(parameter.containsVal("k4", "4"));
 
         assertFalse(parameter.containsVal("k1", "4"));

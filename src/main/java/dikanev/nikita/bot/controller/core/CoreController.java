@@ -2,7 +2,6 @@ package dikanev.nikita.bot.controller.core;
 
 import dikanev.nikita.bot.api.exceptions.*;
 import dikanev.nikita.bot.api.objects.JObject;
-import dikanev.nikita.bot.api.objects.ExceptionObject;
 import dikanev.nikita.bot.service.client.core.CoreResponseClient;
 import dikanev.nikita.bot.controller.objects.ObjectsController;
 import dikanev.nikita.bot.service.client.parameter.Parameter;
