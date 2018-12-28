@@ -190,4 +190,18 @@ public class UserCoreConnector {
         }
         return null;
     }
+
+    public static boolean updateUserInfo(String token, int userId, String updateData, String newValue) throws ApiException {
+        if (updateData == null) {
+            return false;
+        }
+
+        JObject req = CoreController.execute("user/info/update", new HttpGetParameter()
+                .add("token", token)
+                .add("id", String.valueOf(userId))
+                .set(updateData, newValue));
+        ObjectsController.ifExceptionThrow(req);
+
+        return req.getObj().get("message").getAsString().toLowerCase().equals("ok");
+    }
 }

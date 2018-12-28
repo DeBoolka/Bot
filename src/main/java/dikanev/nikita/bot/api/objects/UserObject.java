@@ -9,7 +9,7 @@ public class UserObject extends ApiObject {
 
     private int idGroup = 0;
 
-    private String sName = null;
+    private String s_name = null;
 
     private String name = null;
 
@@ -17,12 +17,12 @@ public class UserObject extends ApiObject {
         super("user");
     }
 
-    public UserObject(int id, int idGroup, String sName, String name) {
+    public UserObject(int id, int idGroup, String s_name, String name) {
         super("user");
 
         this.id = id;
         this.idGroup = idGroup;
-        this.sName = sName;
+        this.s_name = s_name;
         this.name = name;
     }
 
@@ -38,8 +38,8 @@ public class UserObject extends ApiObject {
         return idGroup;
     }
 
-    public String getsName() {
-        return sName;
+    public String getS_name() {
+        return s_name;
     }
 
 
@@ -57,8 +57,8 @@ public class UserObject extends ApiObject {
             if (root.has("idGroup")) {
                 idGroup = root.get("idGroup").getAsInt();
             }
-            if (root.has("sName")) {
-                sName = root.get("sName").getAsString();
+            if (root.has("s_name")) {
+                s_name = root.get("s_name").getAsString();
             }
             if (root.has("name")) {
                 name = root.get("name").getAsString();

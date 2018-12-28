@@ -57,7 +57,7 @@ public class UserInfoObject extends ApiObject {
             if (root.has("age")) {
                 age = Date.valueOf(root.get("age").getAsString());
             }
-            if (root.has("city")) {
+            if (root.has("phone")) {
                 phone = root.get("phone").getAsString();
             }
             if (root.has("city")) {

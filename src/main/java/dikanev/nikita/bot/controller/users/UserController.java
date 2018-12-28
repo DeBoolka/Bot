@@ -94,4 +94,8 @@ public class UserController {
     public static JObject getPersonalDataOfUser(String token, int userId, String... data) throws ApiException, SQLException {
         return UserCoreConnector.getPersonalDataOfUser(token, UserDBConnector.getIdCore(userId), data);
     }
+
+    public static boolean updateUserInfo(String token, int userId, String updateData, String newValues) throws SQLException, ApiException {
+        return UserCoreConnector.updateUserInfo(token, UserDBConnector.getIdCore(userId), updateData, newValues);
+    }
 }

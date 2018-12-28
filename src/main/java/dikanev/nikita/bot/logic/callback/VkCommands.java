@@ -1,8 +1,8 @@
 package dikanev.nikita.bot.logic.callback;
 
 import dikanev.nikita.bot.logic.callback.commands.*;
-import dikanev.nikita.bot.logic.callback.commands.menus.AdminMenuCommand;
-import dikanev.nikita.bot.logic.callback.commands.menus.PersonMenuCommand;
+import dikanev.nikita.bot.logic.callback.commands.menu.AdminMenuCommand;
+import dikanev.nikita.bot.logic.callback.commands.menu.PersonMenuCommand;
 
 public enum VkCommands {
     ENTRY_BOT(new EntryBotCommand()),

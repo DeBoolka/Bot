@@ -54,24 +54,26 @@ public class MenuCommand extends VkCommandHandler {
     //Возврщает map с путем доступа в качестве ключа (bot/vk/...) и в качестве значения CommandData
     @Override
     protected Map<String, CommandData> getCommands(CommandResponse cmdResp, Parameter args) {
-            return new LinkedHashMap<>(Map.of(
-                    "bot/vk/admin/", new CommandData("Админ", " - Меню администратора", true, (resp, data, commands) ->
-                            cmdResp.setArgs("").setIdCommand(VkCommands.ADMIN_MENU.id()).setInit()
+        Map<String, CommandData> res = new LinkedHashMap<>();
+
+        res.put("bot/vk/admin/", new CommandData("Админ", " - Меню администратора", true, (resp, data, commands) ->
+                cmdResp.setArgs("").setIdCommand(VkCommands.ADMIN_MENU.id()).setInit()
 //                            unrealizedOperation(cmdResp)
-                    ),
-                    "bot/vk/person", new CommandData("Аккаунт", " - Личный кабинет", true, (resp, data, commands) ->
-                            cmdResp.setArgs("").setIdCommand(VkCommands.PERSONAL_MENU_OF_USER.id()).setInit()
-                    ),
-                    "bot/vk/invite/apply", new CommandData("Пригласительный", " - Ввод пригласительного", true, (resp, data, commands) -> {
-                        addWorker(args, "apply-invite");
-                        sendMessage("Введите ваш инвайт код.", cmdResp.getIdUser());
-                        return resp.finish();
-                    }),
-                    "help", new CommandData("help",true, "- Выводит список команд", (resp, data, commands) -> {
-                        cmdResp.getArgs().set("message", helpCommand(commands));
-                        return cmdResp.setInit();
-                    })
-            ));
+        ));
+        res.put("bot/vk/person", new CommandData("Аккаунт", " - Личный кабинет", true, (resp, data, commands) ->
+                cmdResp.setArgs("").setIdCommand(VkCommands.PERSONAL_MENU_OF_USER.id()).setInit()
+        ));
+        res.put("bot/vk/invite/apply", new CommandData("Пригласительный", " - Ввод пригласительного", true, (resp, data, commands) -> {
+            addWorker(args, "apply-invite");
+            sendMessage("Введите ваш инвайт код.", cmdResp.getIdUser());
+            return resp.finish();
+        }));
+        res.put("help", new CommandData("help",true, "- Выводит список команд", (resp, data, commands) -> {
+            cmdResp.getArgs().set("message", helpCommand(commands));
+            return cmdResp.setInit();
+        }));
+
+        return res;
     }
 
     protected void addWorker(Parameter args, String workerName) {

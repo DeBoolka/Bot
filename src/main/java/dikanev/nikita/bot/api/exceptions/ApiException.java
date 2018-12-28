@@ -9,6 +9,8 @@ public class ApiException extends Exception {
 
     private Integer code;
 
+    public int serverCode = -1;
+
     public ApiException(Integer code, String description, String message) {
         this.description = description;
         this.code = code;
@@ -17,6 +19,11 @@ public class ApiException extends Exception {
 
     public ApiException(Integer code, String message) {
         this(code, "Unknown", message);
+    }
+
+    public ApiException(int code, String description, String message, int serverCode) {
+        this(code, description, message);
+        this.serverCode = serverCode;
     }
 
     public String getDescription() {
