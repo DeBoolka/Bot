@@ -191,7 +191,7 @@ public interface Parameter{
      * @param val проверяемое значение
      * @return {@code true}, если значения есть в параметре
      */
-    boolean containsVal(String param, String val);
+    boolean containsVal(String param, String val, String ... values);
 
     /**
      * Проверяет, что значение присутствует в параметре

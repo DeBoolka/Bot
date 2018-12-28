@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import dikanev.nikita.bot.api.exceptions.ApiException;
 import dikanev.nikita.bot.api.groups.Group;
 import dikanev.nikita.bot.api.objects.JObject;
+import dikanev.nikita.bot.api.objects.UserInfoObject;
 import dikanev.nikita.bot.api.objects.UserObject;
 import dikanev.nikita.bot.logic.connector.core.UserCoreConnector;
 import dikanev.nikita.bot.logic.connector.db.users.UserDBConnector;
@@ -38,16 +39,13 @@ public class UserController {
 
     //Получение информации о человеке.
     //Возвращает map с ключами: id, id_core, id_command, token, args
-    public static Map<String, Object> getData(int idUser) throws SQLException {
-        return UserDBConnector.getData(idUser);
+    public static Map<String, Object> getSystemData(int idUser) throws SQLException {
+        return UserDBConnector.getSystemData(idUser);
     }
 
     //Получает юзера из ядра
     public static UserObject getUser(String token, int idUser) throws SQLException, ApiException {
-        LOG.debug("UserController.getUser(" + token + ", " + idUser + ")");
-        idUser = UserDBConnector.getIdCore(idUser);
-        LOG.debug("UserController.getUser idCore: " + idUser);
-        return UserCoreConnector.getUser(token, idUser);
+        return UserCoreConnector.getUser(token, UserDBConnector.getIdCore(idUser));
     }
 
     //Получить токен
@@ -87,5 +85,13 @@ public class UserController {
             LOG.error("Failed get userId in core.", e);
             return null;
         }
+    }
+
+    public static UserInfoObject getUserInfo(String token, int userId) throws SQLException, ApiException {
+        return UserCoreConnector.getUserInfo(token, UserDBConnector.getIdCore(userId));
+    }
+
+    public static JObject getPersonalDataOfUser(String token, int userId, String... data) throws ApiException, SQLException {
+        return UserCoreConnector.getPersonalDataOfUser(token, UserDBConnector.getIdCore(userId), data);
     }
 }

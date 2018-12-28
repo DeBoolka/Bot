@@ -5,6 +5,7 @@ import dikanev.nikita.bot.api.exceptions.*;
 import dikanev.nikita.bot.api.groups.Group;
 import dikanev.nikita.bot.api.objects.JObject;
 import dikanev.nikita.bot.api.objects.MessageObject;
+import dikanev.nikita.bot.api.objects.UserInfoObject;
 import dikanev.nikita.bot.api.objects.UserObject;
 import dikanev.nikita.bot.controller.core.CoreController;
 import dikanev.nikita.bot.controller.objects.ObjectsController;
@@ -14,6 +15,9 @@ import dikanev.nikita.bot.service.storage.clients.CoreClientStorage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.sql.Date;
+import java.util.List;
+
 public class UserCoreConnector {
 
     private static final Logger LOG = LoggerFactory.getLogger(UserCoreConnector.class);
@@ -21,10 +25,6 @@ public class UserCoreConnector {
     //Возвращает юзера.
     //Кидает исключения: NoAccessException, NotFoundException, UnidentifiedException
     public static UserObject getUser(String token, int id) throws ApiException {
-        Parameter getParam = new HttpGetParameter()
-                .add("token", token)
-                .add("id", String.valueOf(id));
-
         JObject req = CoreController.execute("user/get"
                 , new HttpGetParameter()
                         .add("token", token)
@@ -151,6 +151,42 @@ public class UserCoreConnector {
         JsonObject root = req.getObj();
         if (root.has("message") && root.get("message").getAsString().toLowerCase().equals("ok")) {
             return new Group(groupId, GroupCoreConnector.getGroupName(CoreClientStorage.getInstance().getToken(), groupId));
+        }
+        return null;
+    }
+
+    public static UserInfoObject getUserInfo(String token, int userId) throws ApiException {
+        JObject req = CoreController.execute("user/info/get"
+                , new HttpGetParameter()
+                        .add("token", token)
+                        .add("id", String.valueOf(userId))
+        );
+        ObjectsController.ifExceptionThrow(req);
+
+        return req.cast(UserInfoObject.empty());
+    }
+
+    public static UserInfoObject getUserInfo(String token, boolean isLoginTrueElseEmail, String loginOrEmail) throws ApiException {
+        JObject req = CoreController.execute("user/info/get"
+                , new HttpGetParameter()
+                        .add("token", token)
+                        .add(isLoginTrueElseEmail ? "login" : "email", loginOrEmail)
+        );
+        ObjectsController.ifExceptionThrow(req);
+
+        return req.cast(UserInfoObject.empty());
+    }
+
+    public static JObject getPersonalDataOfUser(String token, int userId, String... data) throws ApiException {
+        JObject req = CoreController.execute("user/info/get", new HttpGetParameter()
+                .add("token", token)
+                .add("id", String.valueOf(userId))
+                .add("col", List.of(data)));
+        ObjectsController.ifExceptionThrow(req);
+
+        JsonObject root = req.getObj();
+        if (root.has("object")) {
+            return new JObject(root.get("object"));
         }
         return null;
     }

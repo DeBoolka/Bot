@@ -265,13 +265,23 @@ public class JsonParameter implements Parameter {
     }
 
     @Override
-    public boolean containsVal(String param, String val) {
+    public boolean containsVal(String param, String val, String ... values) {
         List<String> lst = get(param);
         if (lst == null) {
             return false;
         }
 
-        return lst.contains(val);
+        boolean res = lst.contains(val);
+        if (res || values == null || values.length == 0) {
+            return res;
+        }
+
+        for (String temp : values) {
+            if (lst.contains(temp)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

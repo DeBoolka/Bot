@@ -59,11 +59,8 @@ public class MenuCommand extends VkCommandHandler {
                             cmdResp.setArgs("").setIdCommand(VkCommands.ADMIN_MENU.id()).setInit()
 //                            unrealizedOperation(cmdResp)
                     ),
-                    "bot/vk/game/", new CommandData("Игры", " - Меню игр", true, (resp, data, commands) ->
-                            unrealizedOperation(cmdResp)
-                    ),
-                    "bot/vk/team/", new CommandData("Команды", " - Меню команд (team)", true, (resp, data, commands) ->
-                            unrealizedOperation(cmdResp)
+                    "bot/vk/person", new CommandData("Аккаунт", " - Личный кабинет", true, (resp, data, commands) ->
+                            cmdResp.setArgs("").setIdCommand(VkCommands.PERSONAL_MENU_OF_USER.id()).setInit()
                     ),
                     "bot/vk/invite/apply", new CommandData("Пригласительный", " - Ввод пригласительного", true, (resp, data, commands) -> {
                         addWorker(args, "apply-invite");
