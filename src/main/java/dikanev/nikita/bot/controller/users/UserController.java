@@ -1,18 +1,26 @@
 package dikanev.nikita.bot.controller.users;
 
 import com.google.gson.JsonObject;
+import com.vk.api.sdk.exceptions.ClientException;
+import dikanev.nikita.bot.api.PhotoVk;
 import dikanev.nikita.bot.api.exceptions.ApiException;
+import dikanev.nikita.bot.api.exceptions.InvalidParametersException;
 import dikanev.nikita.bot.api.groups.Group;
 import dikanev.nikita.bot.api.objects.JObject;
 import dikanev.nikita.bot.api.objects.UserInfoObject;
 import dikanev.nikita.bot.api.objects.UserObject;
+import dikanev.nikita.bot.controller.PhotoController;
 import dikanev.nikita.bot.logic.connector.core.UserCoreConnector;
+import dikanev.nikita.bot.logic.connector.db.PhotoDBConnector;
 import dikanev.nikita.bot.logic.connector.db.users.UserDBConnector;
 import dikanev.nikita.bot.service.storage.clients.CoreClientStorage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class UserController {
@@ -97,5 +105,42 @@ public class UserController {
 
     public static boolean updateUserInfo(String token, int userId, String updateData, String newValues) throws SQLException, ApiException {
         return UserCoreConnector.updateUserInfo(token, UserDBConnector.getIdCore(userId), updateData, newValues);
+    }
+
+    public static Map<String, Integer> addPhoto(String token, int userId, Map<PhotoVk, String> photosInVk) throws SQLException, ApiException {
+        String[] links = photosInVk.values().toArray(new String[0]);
+        Map<String, Integer> photosInCore = UserCoreConnector.addPhoto(token, UserDBConnector.getIdCore(userId), links);
+
+        List<PhotoVk> photoInVkAndCore = new ArrayList<>(photosInCore.size());
+        photosInVk.forEach((phVk, link) -> {
+            Integer coreId = photosInCore.get(link);
+            if (coreId != null) {
+                phVk.coreId = coreId;
+                photoInVkAndCore.add(phVk);
+            }
+        });
+        PhotoDBConnector.addPhoto(photoInVkAndCore);
+
+        return photosInCore;
+    }
+
+    public static List<PhotoVk> getPhotoByUser(String token, int userId, int indent, int count) throws ApiException, ClientException, com.vk.api.sdk.exceptions.ApiException, SQLException {
+        Map<Integer, String> photosCore = UserCoreConnector.getPhotoByUser(token, UserDBConnector.getIdCore(userId), indent, count);
+        if (photosCore == null) {
+            throw new InvalidParametersException("Incorrect count or indent parameter.");
+        } else if (photosCore.isEmpty()) {
+            return null;
+        }
+
+        List<PhotoVk> photosCoreAndVk = PhotoDBConnector.getPhotoFromCore(photosCore.keySet().toArray(new Integer[0]));
+        Map<Integer, String> notLoadInVk = new HashMap<>(photosCore);
+        photosCoreAndVk.forEach(it -> notLoadInVk.remove(it.coreId));
+
+        if (!notLoadInVk.isEmpty()) {
+            LOG.info("Not load in vk: " + notLoadInVk);
+            photosCoreAndVk.addAll(PhotoController.loadInVk(userId, notLoadInVk));
+        }
+
+        return photosCoreAndVk;
     }
 }

@@ -47,6 +47,9 @@ public class PersonMenuCommand extends MenuCommand {
             sendMessage("Выберите цифру информации, которую хотите редактировать\n" + getNamesOfPublicDataOfUser(), resp.getIdUser());
             return cmdResp.finish();
         }));
+        res.put("bot/vk/person/photo", new CommandData("Фото", "- Ваши фотографии", true, (resp, data, commands) ->
+                cmdResp.setArgs("").setIdCommand(VkCommands.PHOTO_OF_USER.id()).setInit()
+        ));
         res.put("help", new CommandData("help", true, "- Выводит список команд", (resp, data, commands) -> {
             args.set("message", helpCommand(commands));
             return cmdResp.setInit();

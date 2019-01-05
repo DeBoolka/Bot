@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.vk.api.sdk.exceptions.ApiException;
 import com.vk.api.sdk.exceptions.ClientException;
+import com.vk.api.sdk.queries.messages.MessagesSendQuery;
 import dikanev.nikita.bot.logic.callback.CommandResponse;
 import dikanev.nikita.bot.service.client.parameter.Parameter;
 import dikanev.nikita.bot.service.storage.DataStorage;
@@ -52,6 +53,17 @@ public abstract class VkCommand {
     }
 
     public static void sendMessage(String msg, int vkId, boolean one_time, List<List<TK>> buttons) throws ClientException, ApiException {
+        JsonObject jsButtons = buildButtons(one_time, buttons);
+
+        VkClientStorage.getInstance().vk().messages()
+                .send(DataStorage.getInstance().getActor())
+                .randomId(new Random().nextInt(10000))
+                .message(msg)
+                .unsafeParam("keyboard", jsButtons)
+                .peerId(vkId).execute();
+    }
+
+    private static JsonObject buildButtons(boolean one_time, List<List<TK>> buttons) {
         JsonArray columnButton = new JsonArray();
         buttons.forEach(c -> {
             JsonArray rowButton = new JsonArray();
@@ -77,12 +89,7 @@ public abstract class VkCommand {
         messageObject.addProperty("one_time", one_time);
         messageObject.add("buttons", columnButton);
 
-        VkClientStorage.getInstance().vk().messages()
-                .send(DataStorage.getInstance().getActor())
-                .randomId(new Random().nextInt(10000))
-                .message(msg)
-                .unsafeParam("keyboard", messageObject)
-                .peerId(vkId).execute();
+        return messageObject;
     }
 
     public static void sendMessage(String msg, int vkId, List<List<TK>> buttons) throws ClientException, ApiException {
@@ -114,6 +121,41 @@ public abstract class VkCommand {
 
     public List<List<TK>> setDefaultKeyboardButtons() {
         return null;
+    }
+
+    public static class MessageSend {
+        private MessagesSendQuery message;
+
+        public MessageSend(int userId) {
+            message = VkClientStorage.getInstance().vk().messages()
+                    .send(DataStorage.getInstance().getActor())
+                    .peerId(userId);
+        }
+
+        public MessageSend message(String message) {
+            this.message.message(message);
+            return this;
+        }
+
+        public MessageSend button(boolean one_time, List<List<TK>> buttons) {
+            message.unsafeParam("keyboard", buildButtons(one_time, buttons));
+            return this;
+        }
+
+        public MessageSend attachment(List<String> attachment) {
+            message.attachment(attachment);
+            return this;
+        }
+
+        public MessageSend peerId(int id) {
+            message.peerId(id);
+            return this;
+        }
+
+        public MessageSend execute() throws ClientException, ApiException {
+            message.execute();
+            return this;
+        }
     }
 
     public static class TK {

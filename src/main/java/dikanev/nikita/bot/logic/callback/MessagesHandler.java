@@ -1,34 +1,30 @@
 package dikanev.nikita.bot.logic.callback;
 
+import com.google.gson.JsonObject;
 import com.vk.api.sdk.objects.messages.Message;
-import com.vk.api.sdk.objects.users.UserXtrCounters;
 import dikanev.nikita.bot.api.exceptions.NotFoundException;
 import dikanev.nikita.bot.controller.commands.CommandController;
 import dikanev.nikita.bot.controller.users.UserController;
 import dikanev.nikita.bot.logic.callback.commands.VkCommand;
 import dikanev.nikita.bot.service.client.parameter.HttpGetParameter;
 import dikanev.nikita.bot.service.client.parameter.Parameter;
-import dikanev.nikita.bot.service.storage.DataStorage;
-import dikanev.nikita.bot.service.storage.clients.CoreClientStorage;
-import dikanev.nikita.bot.service.storage.clients.VkClientStorage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
-import java.util.List;
 import java.util.Map;
 
 public class MessagesHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(MessagesHandler.class);
 
-    public static void parseMessage(Integer groupId, Message message) {
+    public static void parseMessage(Integer groupId, Message message, JsonObject requestObject) {
         try {
             Map<String, Object> currentDataCommand = getCurrentDataCommand(message);
 
             int currentIdCommand = (Integer) currentDataCommand.get("id_command");
             Parameter args = new HttpGetParameter((String) currentDataCommand.get("args"));
-            CommandResponse commandResponse = new CommandResponse(message.getUserId(), currentIdCommand, args, message);
+            CommandResponse commandResponse = new CommandResponse(message.getUserId(), currentIdCommand, args, message, requestObject);
             commandResponse.setText(message.getBody());
 
             handle(commandResponse);

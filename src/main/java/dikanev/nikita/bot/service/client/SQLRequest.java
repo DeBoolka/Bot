@@ -38,7 +38,9 @@ public class SQLRequest {
     }
 
     public SQLRequest close() throws SQLException {
-        prStatement.close();
+        if (!prStatement.isClosed()) {
+            prStatement.close();
+        }
         return this;
     }
 

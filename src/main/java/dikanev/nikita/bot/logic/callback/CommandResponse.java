@@ -1,7 +1,7 @@
 package dikanev.nikita.bot.logic.callback;
 
+import com.google.gson.JsonObject;
 import com.vk.api.sdk.objects.messages.Message;
-import dikanev.nikita.bot.service.client.parameter.HttpGetParameter;
 import dikanev.nikita.bot.service.client.parameter.Parameter;
 import org.checkerframework.checker.nullness.compatqual.NonNullType;
 
@@ -15,6 +15,8 @@ public class CommandResponse {
 
     private Message message;
 
+    private JsonObject requestObject;
+
     @NonNullType
     private String text = "";
 
@@ -22,10 +24,11 @@ public class CommandResponse {
 
     private boolean isHandle = true;
 
-    public CommandResponse(int idUser, int idCommand, Parameter args, Message message) {
+    public CommandResponse(int idUser, int idCommand, Parameter args, Message message, JsonObject requestObject) {
         this.idUser = idUser;
         this.idCommand = idCommand;
         this.message = message;
+        this.requestObject = requestObject;
         this.args = args;
         setDefault();
     }
@@ -122,5 +125,9 @@ public class CommandResponse {
     public CommandResponse setText(@NonNullType String text) {
         this.text = text;
         return this;
+    }
+
+    public JsonObject getRequestObject() {
+        return requestObject;
     }
 }
