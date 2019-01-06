@@ -1,12 +1,11 @@
 package dikanev.nikita.bot.logic.connector.core;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import dikanev.nikita.bot.api.PhotoVk;
 import dikanev.nikita.bot.api.exceptions.*;
 import dikanev.nikita.bot.api.groups.Group;
-import dikanev.nikita.bot.api.objects.JObject;
-import dikanev.nikita.bot.api.objects.MessageObject;
-import dikanev.nikita.bot.api.objects.UserInfoObject;
-import dikanev.nikita.bot.api.objects.UserObject;
+import dikanev.nikita.bot.api.objects.*;
 import dikanev.nikita.bot.controller.core.CoreController;
 import dikanev.nikita.bot.controller.objects.ObjectsController;
 import dikanev.nikita.bot.service.client.parameter.HttpGetParameter;
@@ -16,7 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.Date;
-import java.util.List;
+import java.util.*;
 
 public class UserCoreConnector {
 
@@ -203,5 +202,64 @@ public class UserCoreConnector {
         ObjectsController.ifExceptionThrow(req);
 
         return req.getObj().get("message").getAsString().toLowerCase().equals("ok");
+    }
+
+    public static Map<String, Integer> addPhoto(String token, int userId, String[] links) throws ApiException {
+        if (links == null || links.length == 0) {
+            return null;
+        }
+
+        JObject req = CoreController.execute("user/photo.add", new HttpGetParameter()
+                .add("token", token)
+                .add("userId", String.valueOf(userId))
+                .set("link", Arrays.asList(links)));
+        ObjectsController.ifExceptionThrow(req);
+
+        Map<String, Integer> photos = new HashMap<>();
+        JsonObject jsRoot = req.getObj();
+        JsonArray jsArray = jsRoot.get("object").getAsJsonObject().get("objects").getAsJsonArray();
+        jsArray.forEach(it -> {
+            JsonObject jsObj = it.getAsJsonObject();
+            photos.put(jsObj.get("link").getAsString(), jsObj.get("id").getAsInt());
+        });
+
+        return photos;
+    }
+
+    public static Map<Integer, String> getPhotoByUser(String token, int userId, int indent, int count) throws ApiException {
+        if (indent < 0 || count <= 0) {
+            return null;
+        }
+
+        JObject req = CoreController.execute("user/photo.get", new HttpGetParameter()
+                .add("token", token)
+                .add("userId", String.valueOf(userId))
+                .add("indent", String.valueOf(indent))
+                .add("count", String.valueOf(count)));
+        ObjectsController.ifExceptionThrow(req);
+
+        Map<Integer, String> photos = new HashMap<>();
+        JsonArray jsArray = req.getObj().get("object").getAsJsonObject().get("objects").getAsJsonArray();
+        jsArray.forEach(it -> {
+            JsonObject jsObj = it.getAsJsonObject();
+            photos.put(jsObj.get("id").getAsInt(), jsObj.get("link").getAsString());
+        });
+
+        return photos;
+    }
+
+    public static boolean deletePhoto(String token, Integer[] photos) throws ApiException {
+        if (photos == null || photos.length == 0) {
+            return true;
+        }
+
+        List<String> photosId = new ArrayList<>();
+        Arrays.stream(photos).forEach(it -> photosId.add(String.valueOf(it)));
+        JObject req = CoreController.execute("user/photo.delete", new HttpGetParameter()
+                .add("token", token)
+                .set("photoId", photosId));
+        ObjectsController.ifExceptionThrow(req);
+
+        return req.cast(MessageObject.empty()).getMessage().toLowerCase().equals("ok");
     }
 }

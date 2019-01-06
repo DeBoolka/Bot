@@ -45,15 +45,15 @@ public abstract class VkCommandHandler extends VkCommand {
     protected abstract Map<String, CommandData> getCommands(CommandResponse cmdResp, Parameter args);
 
     //Метод обрабатывающий отправку сообщения при входе в команду
-    protected void messageHandle(CommandResponse cmdResp, Parameter args, List<List<TK>> buttons) throws Exception {
+    protected void messageHandle(CommandResponse cmdResp, Parameter args, Keyboard buttons) throws Exception {
         String message = args.getF("message");
         if (message == null) {
-            sendMessage(getHelloMessage(cmdResp), cmdResp.getIdUser(), true, buttons);
+            new SendMessage(cmdResp.getIdUser()).message(getHelloMessage(cmdResp)).button(buttons.setOneTime(true)).execute();
             args.set("message", "default");
         } else if(message.equals("default")) {
-            sendMessage("Введите help для получения списка команд", cmdResp.getIdUser(), true, buttons);
+            new SendMessage(cmdResp.getIdUser()).message("Введите help для получения списка команд").button(buttons.setOneTime(true)).execute();
         } else {
-            sendMessage(message, cmdResp.getIdUser(), true, buttons);
+            new SendMessage(cmdResp.getIdUser()).message(message).button(buttons.setOneTime(true)).execute();
             args.set("message", "default");
         }
     }
@@ -72,11 +72,16 @@ public abstract class VkCommandHandler extends VkCommand {
     }
 
     //Получение доступных кнопок
-    protected List<List<TK>> getButtons(Map<String, CommandData> commands) {
-        final List<List<TK>> buttons = new ArrayList<>();
+    protected Keyboard getButtons(Map<String, CommandData> commands) {
+        final Keyboard buttons = new Keyboard();
+        int[] countInRow = new int[]{0};
         commands.forEach((key, val) -> {
             if (val.isAccess()) {
-                buttons.add(List.of(TK.getDefault(val.getName(), val.getName())));
+                buttons.addButton(val.getName(), val.getColor(), val.getName());
+                countInRow[0]++;
+                if (countInRow[0] == 3) {
+                    buttons.endl();
+                }
             }
         });
         return buttons;
@@ -84,7 +89,7 @@ public abstract class VkCommandHandler extends VkCommand {
 
     //Заглушка для нереализованной функции
     protected CommandResponse unrealizedOperation(CommandResponse cmdResp) throws Exception {
-        sendMessage("Извините команда временно недоступна", cmdResp.getIdUser(), false);
+        new SendMessage(cmdResp.getIdUser()).message("Извините команда временно недоступна").execute();
         return cmdResp.setInit();
     }
 
@@ -98,41 +103,45 @@ public abstract class VkCommandHandler extends VkCommand {
 
         boolean loadAccess = false;
 
+        String color = Keyboard.PRIMARY;
+
         CommandProcess cmdProcess;
 
         public CommandData(String name, boolean loadAccess, CommandProcess cmdProcess) {
-            this.name = name;
-            this.loadAccess = loadAccess;
-            this.cmdProcess = cmdProcess;
+            init(name, false, null, loadAccess, null, cmdProcess);
         }
 
         public CommandData(String name, boolean access, String helpMessage, boolean loadAccess, CommandProcess cmdProcess) {
-
-            this.name = name;
-            this.access = access;
-            this.helpMessage = helpMessage;
-            this.loadAccess = loadAccess;
-            this.cmdProcess = cmdProcess;
+            init(name, access, helpMessage, loadAccess, null, cmdProcess);
         }
 
         public CommandData(String name, boolean access, String helpMessage, CommandProcess cmdProcess) {
-            this.name = name;
-            this.access = access;
-            this.helpMessage = helpMessage;
-            this.cmdProcess = cmdProcess;
+            init(name, access, helpMessage, false, null, cmdProcess);
         }
 
         public CommandData(String name, String helpMessage, boolean loadAccess, CommandProcess cmdProcess) {
-            this.name = name;
-            this.helpMessage = helpMessage;
-            this.loadAccess = loadAccess;
-            this.cmdProcess = cmdProcess;
+            init(name, false, helpMessage, loadAccess, null, cmdProcess);
         }
 
         public CommandData(String name, String helpMessage, CommandProcess cmdProcess) {
-            this.name = name;
-            this.helpMessage = helpMessage;
-            this.cmdProcess = cmdProcess;
+            init(name, false, helpMessage, false, null, cmdProcess);
+        }
+
+        public CommandData(String name, boolean access, String helpMessage, String color, CommandProcess cmdProcess) {
+            init(name, access, helpMessage, false, color, cmdProcess);
+        }
+
+        public CommandData(String name, String helpMessage, boolean loadAccess, String color, CommandProcess cmdProcess) {
+            init(name, false, helpMessage, loadAccess, color, cmdProcess);
+        }
+
+        private void init(String name, boolean access, String helpMessage, boolean loadAccess, String color, CommandProcess cmdProcess) {
+            this.name = name != null ? name : this.name;
+            this.access = access;
+            this.helpMessage = helpMessage != null ? helpMessage : this.helpMessage;
+            this.loadAccess = loadAccess;
+            this.color = color != null ? color : this.color;
+            this.cmdProcess = cmdProcess != null ? cmdProcess : this.cmdProcess;
         }
 
         public String getName() {
@@ -169,6 +178,10 @@ public abstract class VkCommandHandler extends VkCommand {
 
         public void setLoadAccess(boolean loadAccess) {
             this.loadAccess = loadAccess;
+        }
+
+        public String getColor() {
+            return color;
         }
     }
 

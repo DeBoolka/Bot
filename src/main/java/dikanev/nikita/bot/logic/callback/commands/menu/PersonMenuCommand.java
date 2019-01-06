@@ -44,14 +44,17 @@ public class PersonMenuCommand extends MenuCommand {
         }));
         res.put("bot/vk/person/info/update", new CommandData("Изменить", "- Заполнение или изменение информации о себе", true, (resp, data, commands) -> {
             addWorker(args, "change-info", "change-info");
-            sendMessage("Выберите цифру информации, которую хотите редактировать\n" + getNamesOfPublicDataOfUser(), resp.getIdUser());
+            new SendMessage(resp.getIdUser()).message("Выберите цифру информации, которую хотите редактировать\n" + getNamesOfPublicDataOfUser()).execute();
             return cmdResp.finish();
         }));
-        res.put("help", new CommandData("help", true, "- Выводит список команд", (resp, data, commands) -> {
+        res.put("bot/vk/person/photo", new CommandData("Фото", "- Ваши фотографии", true, (resp, data, commands) ->
+                cmdResp.setArgs("").setIdCommand(VkCommands.PHOTO_OF_USER.id()).setInit()
+        ));
+        res.put("help", new CommandData("help", true, "- Выводит список команд", Keyboard.DEFAULT, (resp, data, commands) -> {
             args.set("message", helpCommand(commands));
             return cmdResp.setInit();
         }));
-        res.put("menu", new CommandData("menu", true, "- Главное меню", (resp, data, commands) ->
+        res.put("menu", new CommandData("menu", true, "- Главное меню", Keyboard.DEFAULT, (resp, data, commands) ->
                 cmdResp.setArgs("").setIdCommand(VkCommands.MENU.id()).setInit()
         ));
 
@@ -109,11 +112,11 @@ public class PersonMenuCommand extends MenuCommand {
                     for (int i = 0; i < publicDataOfUser.length; i += COUNT_COLUMN_PUBLIC_DATA_OF_USER) {
                         if (i / COUNT_COLUMN_PUBLIC_DATA_OF_USER + 1 == indexChangedDate) {
                             param.set("change-data", publicDataOfUser[i + 1]);
-                            sendMessage("Введите новые данные", resp.getIdUser());
+                            new SendMessage(resp.getIdUser()).message("Введите новые данные").execute();
                             return;
                         }
                     }
-                    sendMessage("Не верный индекс", resp.getIdUser());
+                    new SendMessage(resp.getIdUser()).message("Не верный индекс").execute();
                     resp.setArgs("");
                     return;
                 }
@@ -127,15 +130,15 @@ public class PersonMenuCommand extends MenuCommand {
                         , text.trim()
                 );
 
-                sendMessage(isUpdate ? "Информация успешно сохранена" : "Команда временно недоступна", resp.getIdUser());
+                new SendMessage(resp.getIdUser()).message(isUpdate ? "Информация успешно сохранена" : "Команда временно недоступна").execute();
                 resp.setArgs("");
                 return;
             } catch (NumberFormatException e) {
-                sendMessage("Не корректный индекс.", resp.getIdUser());
+                new SendMessage(resp.getIdUser()).message("Не корректный индекс.").execute();
             }
         } catch (InvalidParametersException e) {
             try {
-                sendMessage("Не верный индекс или формат нового значения", resp.getIdUser());
+                new SendMessage(resp.getIdUser()).message("Не верный индекс или формат нового значения").execute();
             } catch (Exception ex) {
                 LOG.error("Fatal error: ", ex);
             }

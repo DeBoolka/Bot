@@ -22,8 +22,7 @@ public class MenuCommand extends VkCommandHandler {
         Map<String, CommandData> commands = getCommands(cmdResp, cmdResp.getArgs());
         loadAccessCommands(cmdResp, args, commands);
 
-        final List<List<TK>> buttons = getButtons(commands);
-
+        final Keyboard buttons = getButtons(commands);
         messageHandle(cmdResp, args, buttons);
 
         return cmdResp.finish();
@@ -63,12 +62,12 @@ public class MenuCommand extends VkCommandHandler {
         res.put("bot/vk/person", new CommandData("Аккаунт", " - Личный кабинет", true, (resp, data, commands) ->
                 cmdResp.setArgs("").setIdCommand(VkCommands.PERSONAL_MENU_OF_USER.id()).setInit()
         ));
-        res.put("bot/vk/invite/apply", new CommandData("Пригласительный", " - Ввод пригласительного", true, (resp, data, commands) -> {
+        res.put("bot/vk/invite/apply", new CommandData("Пригласительный", " - Ввод пригласительного", true, Keyboard.POSITIVE, (resp, data, commands) -> {
             addWorker(args, "apply-invite");
-            sendMessage("Введите ваш инвайт код.", cmdResp.getIdUser());
+            new SendMessage(cmdResp.getIdUser()).message("Введите ваш инвайт код.").execute();
             return resp.finish();
         }));
-        res.put("help", new CommandData("help",true, "- Выводит список команд", (resp, data, commands) -> {
+        res.put("help", new CommandData("help",true, "- Выводит список команд", Keyboard.DEFAULT, (resp, data, commands) -> {
             cmdResp.getArgs().set("message", helpCommand(commands));
             return cmdResp.setInit();
         }));
@@ -134,12 +133,12 @@ public class MenuCommand extends VkCommandHandler {
         try {
             try {
                 Group group = UserController.applyInvite(CoreClientStorage.getInstance().getToken(), userId, invite);
-                sendMessage("Инвайт код успешно применен.\nВы теперь в группе: " + group.name, userId);
+                new SendMessage(userId).message("Инвайт код успешно применен.\nВы теперь в группе:").execute();
             } catch (InvalidParametersException e) {
-                sendMessage("Инвайт код не найден.", userId);
+                new SendMessage(userId).message("Инвайт код не найден.").execute();
             } catch (Exception e) {
                 LOG.error(e.getMessage(), e);
-                sendMessage("Команда временно недоступна.", userId);
+                new SendMessage(userId).message("Команда временно недоступна.").execute();
             }
         } catch (Exception e) {
             LOG.error("Send message error: ", e);
