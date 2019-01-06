@@ -25,24 +25,21 @@ public class PhotoMenuCommand extends MenuCommand {
 
         res.put("bot/vk/person/photo.get", new CommandData("Посмотреть", "- Просмотр ваших фото", true, (resp, data, commands) -> {
             addWorker(args, "get-photo", "get-photo");
-            sendMessage("Ваши фото", resp.getIdUser());
+            new SendMessage(resp.getIdUser()).message("Ваши фото").execute();
             cmdResp.setText("назад");
             getPhoto(resp);
             return cmdResp.finish();
         }));
         res.put("bot/vk/person/photo.add", new CommandData("Добавить", "- Добавление фотографий", true, (resp, data, commands) -> {
             addWorker(args, "add-photo", "add-photo");
-            sendMessage("Отправьте фото, которые хотите добавить", resp.getIdUser());
+            new SendMessage(resp.getIdUser()).message("Отправьте фото, которые хотите добавить").execute();
             return cmdResp.finish();
         }));
-        res.put("bot/vk/person/photo.delete", new CommandData("Удалить", "- Удаление фотографии", true, (resp, data, commands) ->
-                unrealizedOperation(cmdResp)
-        ));
-        res.put("help", new CommandData("help", true, "- Выводит список команд", (resp, data, commands) -> {
+        res.put("help", new CommandData("help", true, "- Выводит список команд", Keyboard.DEFAULT, (resp, data, commands) -> {
             args.set("message", helpCommand(commands));
             return cmdResp.setInit();
         }));
-        res.put("back", new CommandData("back", true, "- Возврат в личный кабинет", (resp, data, commands) ->
+        res.put("back", new CommandData("back", true, "- Возврат в личный кабинет", Keyboard.DEFAULT, (resp, data, commands) ->
                 cmdResp.setArgs("").setIdCommand(VkCommands.PERSONAL_MENU_OF_USER.id()).setInit()
         ));
 
@@ -59,35 +56,63 @@ public class PhotoMenuCommand extends MenuCommand {
 
     private void getPhoto(CommandResponse resp){
         String text = resp.getText().trim().toLowerCase();
-        if (!text.equals("назад") && !text.equals("вперед")) {
+        Parameter params = resp.getArgs();
+        int indent = params.getIntFOrDefault("indent", 0);
+        int countPhoto = params.getIntFOrDefault("countPhoto", COUNT_GET_USER_PHOTO);
+
+        if (text.equals("уменьшить") && countPhoto == COUNT_GET_USER_PHOTO) {
+            countPhoto = 1;
+            params.set("countPhoto", String.valueOf(countPhoto));
+        } else if (text.equals("увеличить") && countPhoto == 1) {
+            countPhoto = COUNT_GET_USER_PHOTO;
+            params.set("countPhoto", String.valueOf(countPhoto));
+        } else if (!text.equals("назад") && !text.equals("вперед") && !text.equals("удалить")) {
             resp.setArgs("");
             return;
         }
 
-        Parameter params = resp.getArgs();
-        int indent = params.getIntFOrDefault("indent", 0);
-
-        if (text.equals("назад") && indent >= COUNT_GET_USER_PHOTO) {
-            indent -= COUNT_GET_USER_PHOTO;
+        if (text.equals("назад")) {
+            indent -= (indent - countPhoto >= 0) ? countPhoto : indent;
         } else if (text.equals("вперед") && params.getFOrDefault("hasNextPhoto", "true").equals("true")) {
-            indent += COUNT_GET_USER_PHOTO;
+            indent += countPhoto;
         }
-        params.set("indent", String.valueOf(indent));
+        params.set("indent", String.valueOf(indent))
+                .set("countPhoto", String.valueOf(countPhoto));
 
         try {
-            List<PhotoVk> photos = UserController.getPhotoByUser(CoreClientStorage.getInstance().getToken(), resp.getIdUser(), indent, COUNT_GET_USER_PHOTO);
+            List<PhotoVk> photos = UserController.getPhotoByUser(CoreClientStorage.getInstance().getToken(), resp.getIdUser(), indent, countPhoto);
             if (photos == null || photos.isEmpty()) {
-                new MessageSend(resp.getIdUser()).message("Фотографии отстуствуют").button(true, List.of(List.of(TK.getDefault("Назад")))).execute();
+                new SendMessage(resp.getIdUser()).message("Фотографии отстуствуют").button(new Keyboard(true).prim("Назад")).execute();
                 resp.setArgs("");
                 return;
+            } else if (countPhoto == 1 && text.equals("удалить")) {
+                if (UserController.deletePhoto(CoreClientStorage.getInstance().getToken(), photos.toArray(new PhotoVk[0]))) {
+                    new SendMessage(resp.getIdUser()).message("Фото удалено").execute();
+                    indent = (indent == 0) ? 0 : indent - 1;
+                    photos = UserController.getPhotoByUser(CoreClientStorage.getInstance().getToken(), resp.getIdUser(), indent, countPhoto);
+
+                    if (photos == null || photos.isEmpty()) {
+                        new SendMessage(resp.getIdUser()).message("Фотографии отстуствуют").button(new Keyboard(true).prim("Назад")).execute();
+                        resp.setArgs("");
+                        return;
+                    }
+                } else {
+                    new SendMessage(resp.getIdUser()).message("Не удалось удалить фото").execute();
+                }
             }
-            params.set("hasNextPhoto", photos.size() < COUNT_GET_USER_PHOTO ? "false" : "true");
+            params.set("hasNextPhoto", photos.size() < countPhoto ? "false" : "true");
 
             List<String> sendPhoto = new ArrayList<>(photos.size());
             photos.forEach(it -> sendPhoto.add("photo" + it.getConcatId()));
-            new MessageSend(resp.getIdUser())
+
+            Keyboard keyboard = new Keyboard(true).prim("Назад").positive(countPhoto == 1 ? "Увеличить" : "Уменьшить").prim("Вперед").endl();
+            if (countPhoto == 1) {
+                keyboard.negative("Удалить");
+            }
+            keyboard.def("Отмена");
+            new SendMessage(resp.getIdUser())
                     .attachment(sendPhoto)
-                    .button(true, List.of(List.of(TK.getDefault("Назад"), TK.getDefault("Отмена"), TK.getDefault("Вперед"))))
+                    .button(keyboard)
                     .execute();
         } catch (Exception e) {
             LOG.error("Failed get user photos", e);
@@ -98,7 +123,7 @@ public class PhotoMenuCommand extends MenuCommand {
         JsonArray attachments = getAttachmentsPhoto(resp.getRequestObject());
         try {
             if (attachments == null) {
-                sendMessage("Фото не найдено", resp.getIdUser());
+                new SendMessage(resp.getIdUser()).message("Фото не найдено").execute();
                 resp.setArgs("");
                 return;
             }
@@ -110,9 +135,9 @@ public class PhotoMenuCommand extends MenuCommand {
                     , photos);
 
             if (addedPhotos != null) {
-                sendMessage("Фото дабавлены", resp.getIdUser());
+                new SendMessage(resp.getIdUser()).message("Фото дабавлены").execute();
             } else {
-                sendMessage("Ошибка добавления", resp.getIdUser());
+                new SendMessage(resp.getIdUser()).message("Ошибка добавления").execute();
                 LOG.warn("Failed added photo: " + photos);
             }
         } catch (Exception e) {

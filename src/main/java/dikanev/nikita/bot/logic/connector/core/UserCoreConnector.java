@@ -2,6 +2,7 @@ package dikanev.nikita.bot.logic.connector.core;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import dikanev.nikita.bot.api.PhotoVk;
 import dikanev.nikita.bot.api.exceptions.*;
 import dikanev.nikita.bot.api.groups.Group;
 import dikanev.nikita.bot.api.objects.*;
@@ -14,10 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.Date;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class UserCoreConnector {
 
@@ -248,5 +246,20 @@ public class UserCoreConnector {
         });
 
         return photos;
+    }
+
+    public static boolean deletePhoto(String token, Integer[] photos) throws ApiException {
+        if (photos == null || photos.length == 0) {
+            return true;
+        }
+
+        List<String> photosId = new ArrayList<>();
+        Arrays.stream(photos).forEach(it -> photosId.add(String.valueOf(it)));
+        JObject req = CoreController.execute("user/photo.delete", new HttpGetParameter()
+                .add("token", token)
+                .set("photoId", photosId));
+        ObjectsController.ifExceptionThrow(req);
+
+        return req.cast(MessageObject.empty()).getMessage().toLowerCase().equals("ok");
     }
 }

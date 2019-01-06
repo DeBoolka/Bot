@@ -7,9 +7,6 @@ import dikanev.nikita.bot.service.client.parameter.Parameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class HelpFunctionCommand extends VkCommand {
 
     private static final Logger LOG = LoggerFactory.getLogger(HelpFunctionCommand.class);
@@ -66,11 +63,9 @@ public class HelpFunctionCommand extends VkCommand {
 
         if (helpVal.equals("null")) {
             String ask = args.getFOrDefault("helpAsk", "null");
-            List<List<TK>> buttons = new ArrayList<>(List.of(
-                    List.of(TK.getDefault("Да"), TK.getDefault("Нет"))
-            ));
+            Keyboard buttons = new Keyboard(false).prim("Да").prim("Нет");
+            new SendMessage(cmdResp.getIdUser()).message(ask).button(buttons).execute();
 
-            sendMessage(ask, cmdResp.getIdUser(), buttons);
             args.remove("helpAsk");
             return cmdResp.finish();
         }

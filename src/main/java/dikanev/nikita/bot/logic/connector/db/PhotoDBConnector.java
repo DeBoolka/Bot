@@ -54,6 +54,19 @@ public class PhotoDBConnector {
         return photos;
     }
 
+    public static boolean deletePhoto(Integer[] photos) throws SQLException {
+        if (photos == null || photos.length == 0) {
+            return true;
+        }
+
+        String sql = "DELETE FROM img WHERE id_core IN (" + Joiner.on(", ").join(photos) + ")";
+        SQLRequest req = new SQLRequest(DBStorage.getInstance().getConnection()).build(sql);
+
+        int res = req.executeUpdate();
+        req.close();
+        return res > 0;
+    }
+
     private static String escape(String it) {
         try {
             return URLEncoder.encode(it, "UTF-8");

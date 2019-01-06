@@ -18,10 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class UserController {
 
@@ -142,5 +139,14 @@ public class UserController {
         }
 
         return photosCoreAndVk;
+    }
+
+    public static boolean deletePhoto(String token, PhotoVk[] photos) throws ApiException, SQLException {
+        Integer[] photosId = new Integer[photos.length];
+        for (int i = 0; i < photos.length; i++) {
+            photosId[i] = photos[i].coreId;
+        }
+
+        return UserCoreConnector.deletePhoto(token, photosId) && PhotoDBConnector.deletePhoto(photosId);
     }
 }

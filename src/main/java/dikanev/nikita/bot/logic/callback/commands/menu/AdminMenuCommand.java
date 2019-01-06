@@ -28,19 +28,19 @@ public class AdminMenuCommand extends MenuCommand {
         ));
         res.put("bot/vk/invite/create", new CommandData("create invite", "- Создает инвайт код", true, (resp, data, commands) -> {
             addWorker(args, "invite-create", "invite-create");
-            sendMessage("Введите id группы.", cmdResp.getIdUser());
+            new SendMessage(cmdResp.getIdUser()).message("Введите id группы.").execute();
             return cmdResp.finish();
         }));
         res.put("bot/vk/group/update", new CommandData("change group", "- Изменяет группу пользователя", true, (resp, data, commands) -> {
             addWorker(args, "change-group", "change-group");
-            sendMessage("Введите id пользователя.", cmdResp.getIdUser());
+            new SendMessage(cmdResp.getIdUser()).message("Введите id пользователя.").execute();
             return cmdResp.finish();
         }));
-        res.put("help", new CommandData("help", true, "- Выводит список команд", (resp, data, commands) -> {
+        res.put("help", new CommandData("help", true, "- Выводит список команд", Keyboard.DEFAULT, (resp, data, commands) -> {
             args.set("message", helpCommand(commands));
             return cmdResp.setInit();
         }));
-        res.put("menu", new CommandData("menu", true, "- Возврат в главное меню", (resp, data, commands) ->
+        res.put("menu", new CommandData("menu", true, "- Возврат в главное меню", Keyboard.DEFAULT, (resp, data, commands) ->
                 cmdResp.setArgs("").setIdCommand(VkCommands.MENU.id()).setInit()
         ));
 
@@ -67,14 +67,14 @@ public class AdminMenuCommand extends MenuCommand {
                         , resp.getIdUser()
                         , Integer.valueOf(text));
                 if (invite != null && !invite.isEmpty()) {
-                    sendMessage("Инвайт создан: " + invite, resp.getIdUser());
+                    new SendMessage(resp.getIdUser()).message("Инвайт создан: " + invite).execute();
                     param.remove("menu-block", "invite-create");
                     param.remove("worker", "invite-create");
                     return;
                 }
-                sendMessage("Не удалось создать инвайт код.", resp.getIdUser());
+                new SendMessage(resp.getIdUser()).message("Не удалось создать инвайт код.").execute();
             } catch (NumberFormatException e) {
-                sendMessage("Не корректный id.", resp.getIdUser());
+                new SendMessage(resp.getIdUser()).message("Не корректный id.").execute();
             }
         } catch (Exception e) {
             LOG.error("Failed create invite code: ", e);
@@ -93,7 +93,7 @@ public class AdminMenuCommand extends MenuCommand {
             try {
                 if (!param.contains("change-userId")) {
                     param.set("change-userId", String.valueOf(Integer.valueOf(text)));
-                    sendMessage("Введите id группы которую хотите ему присвоить.", resp.getIdUser());
+                    new SendMessage(resp.getIdUser()).message("Введите id группы которую хотите ему присвоить.").execute();
                     return;
                 }
 
@@ -101,15 +101,15 @@ public class AdminMenuCommand extends MenuCommand {
                         , param.getIntF("change-userId")
                         , Integer.valueOf(text));
                 if (group != null) {
-                    sendMessage("Пользователю присвоена группа: " + group.name, resp.getIdUser());
+                    new SendMessage(resp.getIdUser()).message("Пользователю присвоена группа: " + group.name).execute();
                     param.remove("menu-block", "change-group");
                     param.remove("worker", "change-group");
                     param.remove("change-userId");
                     return;
                 }
-                sendMessage("Не удалось изменить группу.", resp.getIdUser());
+                new SendMessage(resp.getIdUser()).message("Не удалось создать инвайт код.").execute();
             } catch (NumberFormatException e) {
-                sendMessage("Не корректный id.", resp.getIdUser());
+                new SendMessage(resp.getIdUser()).message("Не корректный id.").execute();
             }
         } catch (Exception e) {
             LOG.error("Failed change group: ", e);

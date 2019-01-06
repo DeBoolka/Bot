@@ -20,7 +20,7 @@ public abstract class VkCommand {
 
     private boolean isOneTime = true;
 
-    private List<List<TK>> buttons = null;
+    private Keyboard buttons = null;
 
     public VkCommand() {
         buttons = setDefaultKeyboardButtons();
@@ -29,78 +29,6 @@ public abstract class VkCommand {
     public abstract CommandResponse init(CommandResponse cmdResp, Parameter args) throws Exception;
 
     public abstract CommandResponse handle(CommandResponse cmdResp, Parameter args) throws Exception;
-
-    public static void sendMessage(String msg, int vkId) throws ClientException, ApiException{
-        VkClientStorage.getInstance().vk().messages()
-                .send(DataStorage.getInstance().getActor())
-                .randomId(new Random().nextInt(10000))
-                .message(msg)
-                .peerId(vkId).execute();
-    }
-
-    public void sendMessage(String msg, int vkId, boolean defKeyboard) throws ClientException, ApiException {
-
-        if (defKeyboard && buttons != null) {
-            sendMessage(msg, vkId, isOneTime, buttons);
-            return;
-        }
-
-        VkClientStorage.getInstance().vk().messages()
-                .send(DataStorage.getInstance().getActor())
-                .randomId(new Random().nextInt(10000))
-                .message(msg)
-                .peerId(vkId).execute();
-    }
-
-    public static void sendMessage(String msg, int vkId, boolean one_time, List<List<TK>> buttons) throws ClientException, ApiException {
-        JsonObject jsButtons = buildButtons(one_time, buttons);
-
-        VkClientStorage.getInstance().vk().messages()
-                .send(DataStorage.getInstance().getActor())
-                .randomId(new Random().nextInt(10000))
-                .message(msg)
-                .unsafeParam("keyboard", jsButtons)
-                .peerId(vkId).execute();
-    }
-
-    private static JsonObject buildButtons(boolean one_time, List<List<TK>> buttons) {
-        JsonArray columnButton = new JsonArray();
-        buttons.forEach(c -> {
-            JsonArray rowButton = new JsonArray();
-            c.forEach(r -> {
-                JsonObject payload = new JsonObject();
-                payload.addProperty("button", r.getPayload());
-
-                JsonObject action = new JsonObject();
-                action.addProperty("type", "text");
-                action.addProperty("payload", payload.toString());
-                action.addProperty("label", r.getMsg());
-
-                JsonObject button = new JsonObject();
-                button.add("action", action);
-                button.addProperty("color", "primary");
-
-                rowButton.add(button);
-            });
-            columnButton.add(rowButton);
-        });
-
-        JsonObject messageObject = new JsonObject();
-        messageObject.addProperty("one_time", one_time);
-        messageObject.add("buttons", columnButton);
-
-        return messageObject;
-    }
-
-    public static void sendMessage(String msg, int vkId, List<List<TK>> buttons) throws ClientException, ApiException {
-        sendMessage(msg, vkId, false, buttons);
-    }
-
-    @SafeVarargs
-    public static void sendMessage(String msg, int vkId, boolean one_time, List<TK>... buttons) throws ClientException, ApiException {
-        List<List<TK>> btns = new ArrayList<>(List.of(buttons));
-        sendMessage(msg, vkId, one_time, btns);
-    }
 
     protected static boolean isTrue(String message) {
         message = message.trim().toLowerCase();
@@ -119,132 +47,148 @@ public abstract class VkCommand {
         }
     }
 
-    public List<List<TK>> setDefaultKeyboardButtons() {
+    public Keyboard setDefaultKeyboardButtons() {
         return null;
     }
 
-    public static class MessageSend {
+    public static class SendMessage {
         private MessagesSendQuery message;
 
-        public MessageSend(int userId) {
+        public SendMessage(int userId) {
             message = VkClientStorage.getInstance().vk().messages()
                     .send(DataStorage.getInstance().getActor())
                     .peerId(userId);
         }
 
-        public MessageSend message(String message) {
+        public SendMessage message(String message) {
             this.message.message(message);
             return this;
         }
 
-        public MessageSend button(boolean one_time, List<List<TK>> buttons) {
-            message.unsafeParam("keyboard", buildButtons(one_time, buttons));
+        public SendMessage button(Keyboard keyboard) {
+            message.unsafeParam("keyboard", keyboard.getKeyboard().toString());
             return this;
         }
 
-        public MessageSend attachment(List<String> attachment) {
+        public SendMessage attachment(List<String> attachment) {
             message.attachment(attachment);
             return this;
         }
 
-        public MessageSend peerId(int id) {
+        public SendMessage peerId(int id) {
             message.peerId(id);
             return this;
         }
 
-        public MessageSend execute() throws ClientException, ApiException {
+        public SendMessage execute() throws ClientException, ApiException {
             message.execute();
             return this;
         }
     }
 
-    public static class TK {
+    public static class Keyboard {
 
-        private String msg;
+        public static final String PRIMARY = "primary";
+        public static final String POSITIVE = "positive";
+        public static final String DEFAULT = "default";
+        public static final String NEGATIVE = "negative";
 
-        private String color;
+        public boolean oneTime = true;
 
-        private String payload;
+        private JsonArray rows = new JsonArray();
 
-        public TK(String color, String text, String payload) {
-            this.color = color;
-            this.msg = text;
-            this.payload = payload;
+        private JsonArray currentRow = new JsonArray();
+
+        public Keyboard() {
+            rows.add(currentRow);
         }
 
-        public static TK getPrimary() {
-            return new TK("primary", "null", "unknown");
+        public Keyboard(boolean oneTime) {
+            this.oneTime = oneTime;
+            rows.add(currentRow);
         }
 
-        public static TK getPrimary(String text) {
-            return new TK("primary", text, "unknown");
-        }
-
-        public static TK getPrimary(String text, String payload) {
-            return new TK("primary", text, payload);
-        }
-
-        public static TK getDefault() {
-            return new TK("default", "null", "unknown");
-        }
-
-        public static TK getDefault(String text) {
-            return new TK("default", text, "unknown");
-        }
-
-        public static TK getDefault(String text, String payload) {
-            return new TK("default", text, payload);
-        }
-
-        public static TK getNegative() {
-            return new TK("negative", "null", "unknown");
-        }
-
-        public static TK getNegative(String text) {
-            return new TK("negative", text, "unknown");
-        }
-
-        public static TK getNegative(String text, String payload) {
-            return new TK("negative", text, payload);
-        }
-
-        public static TK getPositive() {
-            return new TK("positive", "null", "unknown");
-        }
-
-        public static TK getPositive(String text) {
-            return new TK("positive", text, "unknown");
-        }
-
-        public static TK getPositive(String text, String payload) {
-            return new TK("positive", text, payload);
-        }
-
-        public TK text(String msg) {
-            this.msg = msg;
+        public Keyboard setOneTime(boolean oneTime) {
+            this.oneTime = oneTime;
             return this;
         }
 
-        public TK text(String msg, String payload) {
-            this.msg = msg;
-            this.payload = payload;
-            return this;
-        }
-
-        public String getMsg() {
-            return msg != null ? msg : "null";
-        }
-
-        public String getColor() {
-            return color;
-        }
-
-        public String getPayload() {
-            if (payload == null) {
-                return getMsg();
+        public JsonObject getKeyboard() {
+            JsonObject keyboard = new JsonObject();
+            keyboard.addProperty("one_time", oneTime);
+            if (currentRow.size() == 0) {
+                rows.remove(rows.size() - 1);
+                keyboard.add("buttons", rows.deepCopy());
+                rows.add(currentRow);
+            } else {
+                keyboard.add("buttons", rows);
             }
 
-            return payload;
+            return keyboard;
+        }
+
+        public Keyboard addButton(String label, String color, String payload) {
+            if (currentRow.size() >= 4) {
+                endl();
+            }
+
+            JsonObject action = new JsonObject();
+            action.addProperty("type", "text");
+            action.addProperty("label", label);
+            if (payload != null) {
+                JsonObject jsPayload = new JsonObject();
+                jsPayload.addProperty("button", payload);
+                action.addProperty("payload", jsPayload.toString());
+            }
+
+            JsonObject button = new JsonObject();
+            button.add("action", action);
+            button.addProperty("color", color);
+
+            currentRow.add(button);
+            return this;
+        }
+
+        public Keyboard endl() {
+            if (rows.size() >= 10) {
+                throw new IllegalStateException("Number of lines exceeded.");
+            }
+
+            currentRow = new JsonArray();
+            rows.add(currentRow);
+            return this;
+        }
+
+        public Keyboard prim(String message, String payload) {
+            return addButton(message, PRIMARY, payload);
+        }
+
+        public Keyboard prim(String message) {
+            return addButton(message, PRIMARY, null);
+        }
+
+        public Keyboard def(String message, String payload) {
+            return addButton(message, DEFAULT, payload);
+        }
+
+        public Keyboard def(String message) {
+            return addButton(message, DEFAULT, null);
+        }
+
+        public Keyboard positive(String message, String payload) {
+            return addButton(message, POSITIVE, payload);
+        }
+
+        public Keyboard positive(String message) {
+            return addButton(message, POSITIVE, null);
+        }
+
+        public Keyboard negative(String message, String payload) {
+            return addButton(message, NEGATIVE, payload);
+        }
+
+        public Keyboard negative(String message) {
+            return addButton(message, NEGATIVE, null);
         }
     }
 }

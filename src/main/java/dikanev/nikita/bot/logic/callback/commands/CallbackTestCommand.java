@@ -12,11 +12,11 @@ public class CallbackTestCommand extends VkCommand {
 
     @Override
     public CommandResponse init(CommandResponse cmdResp, Parameter args) throws Exception {
-        sendMessage("Вы в проверке аргументов\n" +
-                        "Ввод аргумантов:\n" +
-                        "[key1] [value1] [key2] [value2] ...\n" +
-                        "Для выхода в меню введите команду \"Меню\""
-                , cmdResp.getIdUser());
+        new SendMessage(cmdResp.getIdUser()).message("Вы в проверке аргументов\n" +
+                "Ввод аргумантов:\n" +
+                "[key1] [value1] [key2] [value2] ...\n" +
+                "Для выхода в меню введите команду \"Меню\""
+        ).execute();
 
         return cmdResp.setHandle();
     }
@@ -48,13 +48,13 @@ public class CallbackTestCommand extends VkCommand {
         }
 
         if (argsMap.get("name") == null) {
-            sendMessage("Введите имя", cmdResp.getIdUser());
+            new SendMessage(cmdResp.getIdUser()).message("Введите имя").execute();
         } else if (argsMap.get("s_name") == null) {
-            sendMessage("Введите фамилию", cmdResp.getIdUser());
+            new SendMessage(cmdResp.getIdUser()).message("Введите фамилию").execute();
         } else {
             String args = argsMap.getContent();
-            sendMessage("Вот ваши текущие аргументы:\n" + args, cmdResp.getIdUser());
-            sendMessage("Вся информация заполнена\nВы переходите в меню", cmdResp.getIdUser());
+            new SendMessage(cmdResp.getIdUser()).message("Вот ваши текущие аргументы:\n" + args).execute();
+            new SendMessage(cmdResp.getIdUser()).message("Вся информация заполнена\nВы переходите в меню").execute();
             return cmdResp.setIdCommand(VkCommands.MENU.id()).finish();
         }
 
@@ -68,7 +68,7 @@ public class CallbackTestCommand extends VkCommand {
         }
 
         String args = argsMap.getContent();
-        sendMessage("Вот ваши текущие аргументы:\n" + args, cmdResp.getIdUser());
+        new SendMessage(cmdResp.getIdUser()).message("Вот ваши текущие аргументы:\n" + args).execute();
 
         return cmdResp.setIdCommand(VkCommands.CALLBACK_TEST.id()).finish();
     }

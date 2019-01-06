@@ -49,11 +49,10 @@ public class EntryBotCommand extends VkCommand {
     private CommandResponse welcomeMessageInit(CommandResponse cmdResp, Parameter args, List<String> layers) throws ClientException, ApiException {
         if (!layers.contains("0")) {
 
-            sendMessage("Привет.\n" +
-                            "Для входа в систему мне надо узнать тебя лучше.\n" +
-                            "Ты в любой момент можешь ввести команду 'back', чтобы вернуться к прошлому варианту.\n" +
-                            "Для начала давай знакомиться.",
-                    cmdResp.getIdUser());
+            new SendMessage(cmdResp.getIdUser()).message("Привет.\n" +
+                    "Для входа в систему мне надо узнать тебя лучше.\n" +
+                    "Ты в любой момент можешь ввести команду 'back', чтобы вернуться к прошлому варианту.\n" +
+                    "Для начала давай знакомиться.").execute();
 
             args.add("layers", "0");
             layers.add("0");
@@ -72,7 +71,7 @@ public class EntryBotCommand extends VkCommand {
 
     private CommandResponse setNameInit(CommandResponse cmdResp, Parameter args, List<String> layers) throws ClientException, ApiException {
         if (!layers.contains("1")) {
-            sendMessage("Как тебя зовут?", cmdResp.getIdUser());
+            new SendMessage(cmdResp.getIdUser()).message("Как тебя зовут?").execute();
             return cmdResp.finish();
         }
 
@@ -84,11 +83,11 @@ public class EntryBotCommand extends VkCommand {
         if (!layers.contains("1")) {
             String name = cmdResp.getText();
             if (name == null || name.trim().isEmpty()) {
-                sendMessage("Недопустимое имя, введите еще раз.", cmdResp.getIdUser());
+                new SendMessage(cmdResp.getIdUser()).message("Недопустимое имя, введите еще раз.").execute();
                 return cmdResp.finish();
             }
 
-            sendMessage("Очень приятно " + name + "!", cmdResp.getIdUser());
+            new SendMessage(cmdResp.getIdUser()).message("Очень приятно " + name + "!").execute();
             args.add("layers", "1").set("name", name);
             return cmdResp.setInit();
         }
@@ -98,9 +97,7 @@ public class EntryBotCommand extends VkCommand {
 
     private CommandResponse setSNameInit(CommandResponse cmdResp, Parameter args, List<String> layers) throws ClientException, ApiException {
         if (!layers.contains("2")) {
-            List<List<TK>> btn = List.of(List.of(TK.getNegative("back")));
-
-            sendMessage("Введи свою фамилию.", cmdResp.getIdUser(), btn);
+            new SendMessage(cmdResp.getIdUser()).message("Введи свою фамилию.").button(new Keyboard().def("back")).execute();
             return cmdResp.finish();
         }
 
@@ -116,7 +113,7 @@ public class EntryBotCommand extends VkCommand {
 
             String sname = cmdResp.getText();
             if (sname == null || sname.trim().isEmpty()) {
-                sendMessage("Недопустимая фамилия, введите еще раз.", cmdResp.getIdUser());
+                new SendMessage(cmdResp.getIdUser()).message("Недопустимая фамилия, введите еще раз.").execute();
                 return cmdResp.finish();
             }
 
@@ -129,9 +126,7 @@ public class EntryBotCommand extends VkCommand {
 
     private CommandResponse setEmailInit(CommandResponse cmdResp, Parameter args, List<String> layers) throws ClientException, ApiException {
         if (!layers.contains("3")) {
-            List<List<TK>> btn = List.of(List.of(TK.getNegative("back")));
-
-            sendMessage("Введи email.", cmdResp.getIdUser(), btn);
+            new SendMessage(cmdResp.getIdUser()).message("Введи email.").button(new Keyboard().def("back")).execute();
             return cmdResp.finish();
         }
 
@@ -149,10 +144,10 @@ public class EntryBotCommand extends VkCommand {
             if (email == null
                     || email.trim().isEmpty()
                     || !pattern.matcher(email).matches() ) {
-                sendMessage("Некорректный email.", cmdResp.getIdUser());
+                new SendMessage(cmdResp.getIdUser()).message("Некорректный email.").execute();
                 return cmdResp.finish();
             } else if (UserCoreConnector.hasEmail(CoreClientStorage.getInstance().getToken(), email)) {
-                sendMessage("Этот email уже используется.", cmdResp.getIdUser());
+                new SendMessage(cmdResp.getIdUser()).message("Этот email уже используется.").execute();
                 return cmdResp.finish();
             }
 
@@ -165,9 +160,7 @@ public class EntryBotCommand extends VkCommand {
 
     private CommandResponse setLoginInit(CommandResponse cmdResp, Parameter args, List<String> layers) throws ClientException, ApiException {
         if (!layers.contains("4")) {
-            List<List<TK>> btn = List.of(List.of(TK.getNegative("back")));
-
-            sendMessage("Придумай логин.", cmdResp.getIdUser(), btn);
+            new SendMessage(cmdResp.getIdUser()).message("Придумай логин.").button(new Keyboard().def("back")).execute();
             return cmdResp.finish();
         }
 
@@ -184,10 +177,10 @@ public class EntryBotCommand extends VkCommand {
             String login = cmdResp.getText();
             if (login == null
                     || login.trim().isEmpty()) {
-                sendMessage("Некорректный логин", cmdResp.getIdUser());
+                new SendMessage(cmdResp.getIdUser()).message("Некорректный логин").execute();
                 return cmdResp.finish();
             } else if (UserCoreConnector.hasLogin(CoreClientStorage.getInstance().getToken(), login)) {
-                sendMessage("Этот логин занят.", cmdResp.getIdUser());
+                new SendMessage(cmdResp.getIdUser()).message("Этот логин занят.").execute();
                 return cmdResp.finish();
             }
 
@@ -209,8 +202,8 @@ public class EntryBotCommand extends VkCommand {
                     , Groups.DEFAULT_GROUP);
         } catch (Exception e) {
             LOG.warn("Error reg: ", e);
-            sendMessage("Что-то пошло не так при регистрации.\n" +
-                    "Error: " + e.getMessage(), cmdResp.getIdUser());
+            new SendMessage(cmdResp.getIdUser()).message("Что-то пошло не так при регистрации.\n" +
+                    "Error: " + e.getMessage()).execute();
 
             return cmdResp.setArgs("").setInit();
         }
