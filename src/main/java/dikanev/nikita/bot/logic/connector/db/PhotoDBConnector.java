@@ -1,7 +1,7 @@
 package dikanev.nikita.bot.logic.connector.db;
 
 import com.google.common.base.Joiner;
-import dikanev.nikita.bot.api.PhotoVk;
+import dikanev.nikita.bot.api.item.PhotoVk;
 import dikanev.nikita.bot.service.client.SQLRequest;
 import dikanev.nikita.bot.service.storage.DBStorage;
 import org.slf4j.Logger;

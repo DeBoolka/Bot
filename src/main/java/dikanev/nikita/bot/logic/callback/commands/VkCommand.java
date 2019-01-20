@@ -84,6 +84,15 @@ public abstract class VkCommand {
             message.execute();
             return this;
         }
+
+        public SendMessage saveExecute() {
+            try {
+                message.execute();
+            } catch (ApiException | ClientException e) {
+                LOG.warn("Failed send message.", e);
+            }
+            return this;
+        }
     }
 
     public static class Keyboard {

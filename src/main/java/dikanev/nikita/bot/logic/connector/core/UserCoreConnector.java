@@ -2,19 +2,16 @@ package dikanev.nikita.bot.logic.connector.core;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import dikanev.nikita.bot.api.PhotoVk;
 import dikanev.nikita.bot.api.exceptions.*;
 import dikanev.nikita.bot.api.groups.Group;
 import dikanev.nikita.bot.api.objects.*;
 import dikanev.nikita.bot.controller.core.CoreController;
 import dikanev.nikita.bot.controller.objects.ObjectsController;
 import dikanev.nikita.bot.service.client.parameter.HttpGetParameter;
-import dikanev.nikita.bot.service.client.parameter.Parameter;
 import dikanev.nikita.bot.service.storage.clients.CoreClientStorage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.Date;
 import java.util.*;
 
 public class UserCoreConnector {
