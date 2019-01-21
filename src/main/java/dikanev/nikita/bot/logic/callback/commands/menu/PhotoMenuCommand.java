@@ -2,7 +2,8 @@ package dikanev.nikita.bot.logic.callback.commands.menu;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import dikanev.nikita.bot.api.PhotoVk;
+import dikanev.nikita.bot.api.item.PhotoVk;
+import dikanev.nikita.bot.controller.PhotoController;
 import dikanev.nikita.bot.controller.users.UserController;
 import dikanev.nikita.bot.logic.callback.CommandResponse;
 import dikanev.nikita.bot.logic.callback.VkCommands;
@@ -147,59 +148,11 @@ public class PhotoMenuCommand extends MenuCommand {
     }
 
     private Map<PhotoVk, String> getUrlPhotoMaxSize(JsonArray attachments) {
-        Map<PhotoVk, String> photos = new HashMap<>(attachments.size());
-        attachments.forEach(it -> {
-            JsonObject jsPhoto = it.getAsJsonObject().getAsJsonObject("photo");
-            JsonArray sizes = jsPhoto.getAsJsonArray("sizes");
-            if (sizes.size() == 0) {
-                return;
-            }
-
-            final JsonObject[] maxPhoto = {sizes.get(sizes.size() - 1).getAsJsonObject()};
-            int w = maxPhoto[0].getAsJsonPrimitive("width").getAsInt();
-            int h = maxPhoto[0].getAsJsonPrimitive("height").getAsInt();
-            final int[] maxSize = {w * h};
-
-            sizes.forEach(ph -> {
-                JsonObject photo = ph.getAsJsonObject();
-                int width = photo.getAsJsonPrimitive("width").getAsInt();
-                int height = photo.getAsJsonPrimitive("height").getAsInt();
-                if (width * height > maxSize[0]) {
-                    maxPhoto[0] = photo;
-                    maxSize[0] = width * height;
-                }
-            });
-
-            PhotoVk photo = new PhotoVk();
-            photo.id = jsPhoto.getAsJsonPrimitive("id").getAsInt();
-            photo.ownerId = jsPhoto.getAsJsonPrimitive("owner_id").getAsInt();
-            if (jsPhoto.has("access_key")) {
-                photo.accessKey = jsPhoto.getAsJsonPrimitive("access_key").getAsString();
-            }
-            photos.put(photo , maxPhoto[0].get("url").getAsString());
-        });
-
-        return photos;
+        return PhotoController.getUrlPhotoMaxSizeFromMessageVk(attachments);
     }
 
     private JsonArray getAttachmentsPhoto(JsonObject requestObject) {
-        if (!requestObject.has("object")) {
-            return null;
-        }
-
-        requestObject = requestObject.getAsJsonObject("object");
-        if (!requestObject.has("attachments")) {
-            return null;
-        }
-
-        JsonArray attachments = requestObject.getAsJsonArray("attachments");
-        for (int i = attachments.size() - 1; i >= 0; i--) {
-            if (!attachments.get(i).getAsJsonObject().getAsJsonPrimitive("type").getAsString().equals("photo")) {
-                attachments.remove(i);
-            }
-        }
-
-        return attachments.size() > 0 ? attachments : null;
+        return PhotoController.getAttachmentsPhotoFromMessageVk(requestObject);
     }
 
     @Override

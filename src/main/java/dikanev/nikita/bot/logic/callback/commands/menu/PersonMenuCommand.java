@@ -50,6 +50,9 @@ public class PersonMenuCommand extends MenuCommand {
         res.put("bot/vk/person/photo", new CommandData("Фото", "- Ваши фотографии", true, (resp, data, commands) ->
                 cmdResp.setArgs("").setIdCommand(VkCommands.PHOTO_OF_USER.id()).setInit()
         ));
+        res.put("bot/vk/person/ammunition", new CommandData("Снаряжение", "- Ваше снаряжение", true, (resp, data, commands) ->
+                cmdResp.setArgs("").setIdCommand(VkCommands.AMMUNITION_OF_USER.id()).setInit()
+        ));
         res.put("help", new CommandData("help", true, "- Выводит список команд", Keyboard.DEFAULT, (resp, data, commands) -> {
             args.set("message", helpCommand(commands));
             return cmdResp.setInit();

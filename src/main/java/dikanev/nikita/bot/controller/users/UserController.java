@@ -2,7 +2,7 @@ package dikanev.nikita.bot.controller.users;
 
 import com.google.gson.JsonObject;
 import com.vk.api.sdk.exceptions.ClientException;
-import dikanev.nikita.bot.api.PhotoVk;
+import dikanev.nikita.bot.api.item.PhotoVk;
 import dikanev.nikita.bot.api.exceptions.ApiException;
 import dikanev.nikita.bot.api.exceptions.InvalidParametersException;
 import dikanev.nikita.bot.api.groups.Group;

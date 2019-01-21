@@ -1,12 +1,13 @@
 package dikanev.nikita.bot.controller;
 
-import com.vk.api.sdk.exceptions.ApiException;
-import com.vk.api.sdk.exceptions.ClientException;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.vk.api.sdk.objects.photos.Photo;
 import com.vk.api.sdk.objects.photos.PhotoUpload;
 import com.vk.api.sdk.objects.photos.responses.MessageUploadResponse;
 import com.vk.api.sdk.queries.photos.PhotosGetMessagesUploadServerQuery;
-import dikanev.nikita.bot.api.PhotoVk;
+import dikanev.nikita.bot.api.item.PhotoCore;
+import dikanev.nikita.bot.api.item.PhotoVk;
 import dikanev.nikita.bot.logic.connector.db.PhotoDBConnector;
 import dikanev.nikita.bot.service.storage.DataStorage;
 import dikanev.nikita.bot.service.storage.clients.VkClientStorage;
@@ -68,6 +69,21 @@ public class PhotoController {
         return loaded;
     }
 
+    public static List<PhotoVk> getPhotoVk(int userId, PhotoCore[] photos) throws SQLException {
+        Map<Integer, String> photosCore = new HashMap<>(photos.length);
+        Arrays.stream(photos).forEach(it -> photosCore.put(it.id, it.link));
+
+        List<PhotoVk> photosCoreAndVk = PhotoDBConnector.getPhotoFromCore(photosCore.keySet().toArray(new Integer[0]));
+        photosCoreAndVk.forEach(it -> photosCore.remove(it.coreId));
+
+        if (!photosCore.isEmpty()) {
+            LOG.info("Not load photo in vk: " + photosCore);
+            photosCoreAndVk.addAll(PhotoController.loadInVk(userId, photosCore));
+        }
+
+        return photosCoreAndVk;
+    }
+
     private static File saveFiles(String filePath) {
             File file = new File(filePath.replace('/', '.')/*String.valueOf(Objects.hash(System.nanoTime()))*/);
             try {
@@ -78,5 +94,61 @@ public class PhotoController {
             }
 
         return file;
+    }
+
+    public static JsonArray getAttachmentsPhotoFromMessageVk(JsonObject requestObject) {
+        if (!requestObject.has("object")) {
+            return null;
+        }
+
+        requestObject = requestObject.getAsJsonObject("object");
+        if (!requestObject.has("attachments")) {
+            return null;
+        }
+
+        JsonArray attachments = requestObject.getAsJsonArray("attachments");
+        for (int i = attachments.size() - 1; i >= 0; i--) {
+            if (!attachments.get(i).getAsJsonObject().getAsJsonPrimitive("type").getAsString().equals("photo")) {
+                attachments.remove(i);
+            }
+        }
+
+        return attachments.size() > 0 ? attachments : null;
+    }
+
+    public static Map<PhotoVk, String> getUrlPhotoMaxSizeFromMessageVk(JsonArray attachments) {
+        Map<PhotoVk, String> photos = new HashMap<>(attachments.size());
+        attachments.forEach(it -> {
+            JsonObject jsPhoto = it.getAsJsonObject().getAsJsonObject("photo");
+            JsonArray sizes = jsPhoto.getAsJsonArray("sizes");
+            if (sizes.size() == 0) {
+                return;
+            }
+
+            final JsonObject[] maxPhoto = {sizes.get(sizes.size() - 1).getAsJsonObject()};
+            int w = maxPhoto[0].getAsJsonPrimitive("width").getAsInt();
+            int h = maxPhoto[0].getAsJsonPrimitive("height").getAsInt();
+            final int[] maxSize = {w * h};
+
+            sizes.forEach(ph -> {
+                JsonObject photo = ph.getAsJsonObject();
+                int width = photo.getAsJsonPrimitive("width").getAsInt();
+                int height = photo.getAsJsonPrimitive("height").getAsInt();
+                if (width * height > maxSize[0]) {
+                    maxPhoto[0] = photo;
+                    maxSize[0] = width * height;
+                }
+            });
+
+            PhotoVk photo = new PhotoVk();
+            photo.id = jsPhoto.getAsJsonPrimitive("id").getAsInt();
+            photo.ownerId = jsPhoto.getAsJsonPrimitive("owner_id").getAsInt();
+            if (jsPhoto.has("access_key")) {
+                photo.accessKey = jsPhoto.getAsJsonPrimitive("access_key").getAsString();
+            }
+            photos.put(photo , maxPhoto[0].get("url").getAsString());
+        });
+
+        return photos;
     }
 }

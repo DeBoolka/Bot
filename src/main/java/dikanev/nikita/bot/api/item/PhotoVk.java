@@ -1,4 +1,4 @@
-package dikanev.nikita.bot.api;
+package dikanev.nikita.bot.api.item;
 
 import java.util.Objects;
 

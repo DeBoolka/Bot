@@ -133,7 +133,7 @@ public class MenuCommand extends VkCommandHandler {
         try {
             try {
                 Group group = UserController.applyInvite(CoreClientStorage.getInstance().getToken(), userId, invite);
-                new SendMessage(userId).message("Инвайт код успешно применен.\nВы теперь в группе:").execute();
+                new SendMessage(userId).message("Инвайт код успешно применен.\nВы теперь в группе: " + group.name).execute();
             } catch (InvalidParametersException e) {
                 new SendMessage(userId).message("Инвайт код не найден.").execute();
             } catch (Exception e) {
