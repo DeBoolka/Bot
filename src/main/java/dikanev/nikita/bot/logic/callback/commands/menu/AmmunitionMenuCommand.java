@@ -2,7 +2,8 @@ package dikanev.nikita.bot.logic.callback.commands.menu;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import dikanev.nikita.bot.api.objects.AmmunitionObject;
+import dikanev.nikita.bot.api.exceptions.ApiException;
+import dikanev.nikita.bot.api.item.Ammunition;
 import dikanev.nikita.bot.api.item.PhotoVk;
 import dikanev.nikita.bot.controller.AmmunitionController;
 import dikanev.nikita.bot.controller.PhotoController;
@@ -14,10 +15,8 @@ import dikanev.nikita.bot.service.storage.clients.CoreClientStorage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.sql.SQLException;
+import java.util.*;
 
 public class AmmunitionMenuCommand extends MenuCommand {
     private static final Logger LOG = LoggerFactory.getLogger(AmmunitionMenuCommand.class);
@@ -27,12 +26,11 @@ public class AmmunitionMenuCommand extends MenuCommand {
         Map<String, CommandData> res = new LinkedHashMap<>();
 
         res.put("bot/vk/person/ammunition.get", new CommandData("Посмотреть", "- Просмотр вашиго снаряжения", true, (resp, data, commands) -> {
-//            addWorker(args, "get-ammunition", "get-ammunition");
-//            new SendMessage(resp.getIdUser()).message("Ваши фото").execute();
-//            cmdResp.setText("назад");
-//            getAmmunition(resp);
-//            return cmdResp.finish();
-            return unrealizedOperation(cmdResp);
+            addWorker(args, "get-ammunition", "get-ammunition");
+            new SendMessage(resp.getIdUser()).message("Ваше снаряжение:\n" + getAllAmmunitionOfUser(resp.getIdUser())).execute();
+            cmdResp.setText("назад");
+            getAmmunition(resp);
+            return cmdResp.finish();
         }));
         res.put("bot/vk/person/ammunition.add", new CommandData("Добавить", "- Добавление снаряжения", true, (resp, data, commands) -> {
             addWorker(args, "add-ammunition", "add-ammunition");
@@ -53,9 +51,72 @@ public class AmmunitionMenuCommand extends MenuCommand {
     @Override
     protected List<Worker> initWorkers(CommandResponse resp, Parameter param) {
         return new ArrayList<>(List.of(
-                new Worker("add-ammunition", it -> addAmmunition(resp))
-//                new Worker("get-ammunition", it -> getAmmunition(resp))
+                new Worker("add-ammunition", it -> addAmmunition(resp)),
+                new Worker("get-ammunition", it -> getAmmunition(resp))
         ));
+    }
+
+    private void getAmmunition(CommandResponse resp) {
+        String text = resp.getText().trim().toLowerCase();
+        Parameter params = resp.getArgs();
+        int indent = params.getIntFOrDefault("indent", 0);
+
+        if (!text.equals("назад") && !text.equals("вперед") && !text.equals("удалить")) {
+            resp.setArgs("");
+            return;
+        }
+
+        if (text.equals("назад")) {
+            indent -= (indent > 0) ? 1 : 0;
+        } else if (text.equals("вперед")) {
+            indent++;
+        }
+        params.set("indent", String.valueOf(indent));
+
+        try {
+            List<Ammunition> ammunitionList = AmmunitionController.getAmmunitionByUser(CoreClientStorage.getInstance().getToken(), resp.getIdUser(), indent, 1);
+            if (ammunitionList.isEmpty()) {
+                if (indent == 0) {
+                    new SendMessage(resp.getIdUser()).message("Снаряжение отстутствует").button(new Keyboard(true).prim("Назад")).execute();
+                    resp.setArgs("");
+                    return;
+                }
+                params.set("indent", String.valueOf(--indent));
+                ammunitionList = AmmunitionController.getAmmunitionByUser(CoreClientStorage.getInstance().getToken(), resp.getIdUser(), indent, 1);
+            }
+            if (text.equals("удалить")) {
+                if (AmmunitionController.deleteAmmunition(CoreClientStorage.getInstance().getToken(), ammunitionList.get(0).id)) {
+                    new SendMessage(resp.getIdUser()).message("Снаряжение удалено").execute();
+                    indent = (indent == 0) ? 0 : indent - 1;
+                    params.set("indent", String.valueOf(indent));
+                    ammunitionList = AmmunitionController.getAmmunitionByUser(CoreClientStorage.getInstance().getToken(), resp.getIdUser(), indent, 1);
+
+                    if (ammunitionList.isEmpty()) {
+                        new SendMessage(resp.getIdUser()).message("Снаряжение отсутствует").button(new Keyboard(true).prim("Назад")).execute();
+                        resp.setArgs("");
+                        return;
+                    }
+                } else {
+                    new SendMessage(resp.getIdUser()).message("Не удалось удалить снаряжение").execute();
+                }
+            }
+
+            Ammunition ammunition = ammunitionList.get(0);
+            List<PhotoVk> photos = PhotoController.getPhotoVk(resp.getIdUser(), ammunition.photos);
+            List<String> sendPhoto = new ArrayList<>(ammunitionList.size());
+            photos.forEach(it -> sendPhoto.add("photo" + it.getConcatId()));
+
+            LOG.info(ammunition.toString());
+
+            Keyboard keyboard = new Keyboard(true).prim("Назад").prim("Вперед").endl().negative("Удалить").def("Отмена").endl();
+            new SendMessage(resp.getIdUser())
+                    .message(ammunition.name)
+                    .attachment(sendPhoto)
+                    .button(keyboard)
+                    .execute();
+        } catch (Exception e) {
+            LOG.error("Failed get user photos", e);
+        }
     }
 
     private void addAmmunition(CommandResponse resp) {
@@ -73,7 +134,7 @@ public class AmmunitionMenuCommand extends MenuCommand {
                  photos = getUrlPhotoMaxSize(attachments);
             }
 
-            AmmunitionObject ammunition = AmmunitionController.addAmmunition(CoreClientStorage.getInstance().getToken()
+            Ammunition ammunition = AmmunitionController.addAmmunition(CoreClientStorage.getInstance().getToken()
                     , resp.getIdUser()
                     , name
                     , photos != null ? photos.values().toArray(new String[0]) : null);
@@ -97,6 +158,26 @@ public class AmmunitionMenuCommand extends MenuCommand {
 
     private JsonArray getAttachmentsPhoto(JsonObject requestObject) {
         return PhotoController.getAttachmentsPhotoFromMessageVk(requestObject);
+    }
+
+    private String getAllAmmunitionOfUser(int userId) {
+        List<Ammunition> ammunition;
+        try {
+            ammunition = AmmunitionController.getAmmunitionByUser(CoreClientStorage.getInstance().getToken(), userId, 0, 999);
+        } catch (ApiException | SQLException e) {
+            LOG.error("Failed get all ammunition.", e);
+            return "<error>";
+        }
+
+        StringBuilder str = new StringBuilder();
+        ammunition.forEach(it -> {
+            if (str.length() != 0) {
+                str.append(", ");
+            }
+            str.append(it.name);
+        });
+
+        return str.toString();
     }
 
     @Override

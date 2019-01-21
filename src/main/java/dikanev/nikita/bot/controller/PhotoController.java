@@ -6,6 +6,7 @@ import com.vk.api.sdk.objects.photos.Photo;
 import com.vk.api.sdk.objects.photos.PhotoUpload;
 import com.vk.api.sdk.objects.photos.responses.MessageUploadResponse;
 import com.vk.api.sdk.queries.photos.PhotosGetMessagesUploadServerQuery;
+import dikanev.nikita.bot.api.item.PhotoCore;
 import dikanev.nikita.bot.api.item.PhotoVk;
 import dikanev.nikita.bot.logic.connector.db.PhotoDBConnector;
 import dikanev.nikita.bot.service.storage.DataStorage;
@@ -66,6 +67,21 @@ public class PhotoController {
         }
 
         return loaded;
+    }
+
+    public static List<PhotoVk> getPhotoVk(int userId, PhotoCore[] photos) throws SQLException {
+        Map<Integer, String> photosCore = new HashMap<>(photos.length);
+        Arrays.stream(photos).forEach(it -> photosCore.put(it.id, it.link));
+
+        List<PhotoVk> photosCoreAndVk = PhotoDBConnector.getPhotoFromCore(photosCore.keySet().toArray(new Integer[0]));
+        photosCoreAndVk.forEach(it -> photosCore.remove(it.coreId));
+
+        if (!photosCore.isEmpty()) {
+            LOG.info("Not load photo in vk: " + photosCore);
+            photosCoreAndVk.addAll(PhotoController.loadInVk(userId, photosCore));
+        }
+
+        return photosCoreAndVk;
     }
 
     private static File saveFiles(String filePath) {
