@@ -27,7 +27,7 @@ public abstract class VkCommandHandler extends VkCommand {
         Map<String, Boolean> cmdAccessMap;
         try {
             String token = CoreClientStorage.getInstance().getToken();
-            cmdAccessMap = AccessGroupController.getInstance().getAccessUser(token, cmdResp.getIdUser(), commandsName);
+            cmdAccessMap = AccessGroupController.getAccessUser(token, cmdResp.getUserId(), commandsName);
         } catch (Exception e) {
             LOG.warn("Get access error: ", e);
             return;
@@ -48,12 +48,12 @@ public abstract class VkCommandHandler extends VkCommand {
     protected void messageHandle(CommandResponse cmdResp, Parameter args, Keyboard buttons) throws Exception {
         String message = args.getF("message");
         if (message == null) {
-            new SendMessage(cmdResp.getIdUser()).message(getHelloMessage(cmdResp)).button(buttons.setOneTime(true)).execute();
+            new SendMessage(cmdResp.getUserId()).message(getHelloMessage(cmdResp)).button(buttons.setOneTime(true)).execute();
             args.set("message", "default");
         } else if(message.equals("default")) {
-            new SendMessage(cmdResp.getIdUser()).message("Введите help для получения списка команд").button(buttons.setOneTime(true)).execute();
+            new SendMessage(cmdResp.getUserId()).message("Введите help для получения списка команд").button(buttons.setOneTime(true)).execute();
         } else {
-            new SendMessage(cmdResp.getIdUser()).message(message).button(buttons.setOneTime(true)).execute();
+            new SendMessage(cmdResp.getUserId()).message(message).button(buttons.setOneTime(true)).execute();
             args.set("message", "default");
         }
     }
@@ -81,6 +81,7 @@ public abstract class VkCommandHandler extends VkCommand {
                 countInRow[0]++;
                 if (countInRow[0] == 3) {
                     buttons.endl();
+                    countInRow[0] = 0;
                 }
             }
         });
@@ -89,7 +90,7 @@ public abstract class VkCommandHandler extends VkCommand {
 
     //Заглушка для нереализованной функции
     protected CommandResponse unrealizedOperation(CommandResponse cmdResp) throws Exception {
-        new SendMessage(cmdResp.getIdUser()).message("Извините команда временно недоступна").execute();
+        new SendMessage(cmdResp.getUserId()).message("Извините команда временно недоступна").execute();
         return cmdResp.setInit();
     }
 
@@ -187,6 +188,6 @@ public abstract class VkCommandHandler extends VkCommand {
 
     //Класс обрабатывающий действие команды
     protected interface CommandProcess{
-        CommandResponse process(CommandResponse commandResponse, CommandData data, Map<String, CommandData> commands) throws Exception;
+        CommandResponse process(CommandResponse resp, CommandData data, Map<String, CommandData> commands) throws Exception;
     }
 }

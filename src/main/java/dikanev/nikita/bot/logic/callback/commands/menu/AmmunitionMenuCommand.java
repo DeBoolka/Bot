@@ -27,14 +27,14 @@ public class AmmunitionMenuCommand extends MenuCommand {
 
         res.put("bot/vk/person/ammunition.get", new CommandData("Посмотреть", "- Просмотр вашиго снаряжения", true, (resp, data, commands) -> {
             addWorker(args, "get-ammunition", "get-ammunition");
-            new SendMessage(resp.getIdUser()).message("Ваше снаряжение:\n" + getAllAmmunitionOfUser(resp.getIdUser())).execute();
+            new SendMessage(resp.getUserId()).message("Ваше снаряжение:\n" + getAllAmmunitionOfUser(resp.getUserId())).execute();
             cmdResp.setText("назад");
             getAmmunition(resp);
             return cmdResp.finish();
         }));
         res.put("bot/vk/person/ammunition.add", new CommandData("Добавить", "- Добавление снаряжения", true, (resp, data, commands) -> {
             addWorker(args, "add-ammunition", "add-ammunition");
-            new SendMessage(resp.getIdUser()).message("Введите название снаряжения и прикрепите его фотографии").button(new Keyboard(true).def("Отмена")).execute();
+            new SendMessage(resp.getUserId()).message("Введите название снаряжения и прикрепите его фотографии").button(new Keyboard(true).def("Отмена")).execute();
             return cmdResp.finish();
         }));
         res.put("help", new CommandData("help", true, "- Выводит список команд ", Keyboard.DEFAULT, (resp, data, commands) -> {
@@ -74,42 +74,42 @@ public class AmmunitionMenuCommand extends MenuCommand {
         params.set("indent", String.valueOf(indent));
 
         try {
-            List<Ammunition> ammunitionList = AmmunitionController.getAmmunitionByUser(CoreClientStorage.getInstance().getToken(), resp.getIdUser(), indent, 1);
+            List<Ammunition> ammunitionList = AmmunitionController.getAmmunitionByUser(CoreClientStorage.getInstance().getToken(), resp.getUserId(), indent, 1);
             if (ammunitionList.isEmpty()) {
                 if (indent == 0) {
-                    new SendMessage(resp.getIdUser()).message("Снаряжение отстутствует").button(new Keyboard(true).prim("Назад")).execute();
+                    new SendMessage(resp.getUserId()).message("Снаряжение отстутствует").button(new Keyboard(true).prim("Назад")).execute();
                     resp.setArgs("");
                     return;
                 }
                 params.set("indent", String.valueOf(--indent));
-                ammunitionList = AmmunitionController.getAmmunitionByUser(CoreClientStorage.getInstance().getToken(), resp.getIdUser(), indent, 1);
+                ammunitionList = AmmunitionController.getAmmunitionByUser(CoreClientStorage.getInstance().getToken(), resp.getUserId(), indent, 1);
             }
             if (text.equals("удалить")) {
                 if (AmmunitionController.deleteAmmunition(CoreClientStorage.getInstance().getToken(), ammunitionList.get(0).id)) {
-                    new SendMessage(resp.getIdUser()).message("Снаряжение удалено").execute();
+                    new SendMessage(resp.getUserId()).message("Снаряжение удалено").execute();
                     indent = (indent == 0) ? 0 : indent - 1;
                     params.set("indent", String.valueOf(indent));
-                    ammunitionList = AmmunitionController.getAmmunitionByUser(CoreClientStorage.getInstance().getToken(), resp.getIdUser(), indent, 1);
+                    ammunitionList = AmmunitionController.getAmmunitionByUser(CoreClientStorage.getInstance().getToken(), resp.getUserId(), indent, 1);
 
                     if (ammunitionList.isEmpty()) {
-                        new SendMessage(resp.getIdUser()).message("Снаряжение отсутствует").button(new Keyboard(true).prim("Назад")).execute();
+                        new SendMessage(resp.getUserId()).message("Снаряжение отсутствует").button(new Keyboard(true).prim("Назад")).execute();
                         resp.setArgs("");
                         return;
                     }
                 } else {
-                    new SendMessage(resp.getIdUser()).message("Не удалось удалить снаряжение").execute();
+                    new SendMessage(resp.getUserId()).message("Не удалось удалить снаряжение").execute();
                 }
             }
 
             Ammunition ammunition = ammunitionList.get(0);
-            List<PhotoVk> photos = PhotoController.getPhotoVk(resp.getIdUser(), ammunition.photos);
+            List<PhotoVk> photos = PhotoController.getPhotoVk(resp.getUserId(), ammunition.photos);
             List<String> sendPhoto = new ArrayList<>(ammunitionList.size());
             photos.forEach(it -> sendPhoto.add("photo" + it.getConcatId()));
 
             LOG.info(ammunition.toString());
 
             Keyboard keyboard = new Keyboard(true).prim("Назад").prim("Вперед").endl().negative("Удалить").def("Отмена").endl();
-            new SendMessage(resp.getIdUser())
+            new SendMessage(resp.getUserId())
                     .message(ammunition.name)
                     .attachment(sendPhoto)
                     .button(keyboard)
@@ -125,7 +125,7 @@ public class AmmunitionMenuCommand extends MenuCommand {
         Map<PhotoVk, String> photos = null;
         try {
             if (name == null || name.isEmpty()) {
-                new SendMessage(resp.getIdUser()).message("Введите название снаряжения.").execute();
+                new SendMessage(resp.getUserId()).message("Введите название снаряжения.").execute();
                 return;
             } else if(name.equals("Отмена")){
                 resp.setArgs("");
@@ -135,18 +135,18 @@ public class AmmunitionMenuCommand extends MenuCommand {
             }
 
             Ammunition ammunition = AmmunitionController.addAmmunition(CoreClientStorage.getInstance().getToken()
-                    , resp.getIdUser()
+                    , resp.getUserId()
                     , name
                     , photos != null ? photos.values().toArray(new String[0]) : null);
 
             if (ammunition == null) {
-                new SendMessage(resp.getIdUser()).message("Не удалось добавить снаряжение").execute();
+                new SendMessage(resp.getUserId()).message("Не удалось добавить снаряжение").execute();
             } else {
-                new SendMessage(resp.getIdUser()).message("Снаряжение добавленно.").execute();
+                new SendMessage(resp.getUserId()).message("Снаряжение добавленно.").execute();
             }
 
         } catch (Exception e) {
-            new SendMessage(resp.getIdUser()).message("Не удалось добавить снаряжение").saveExecute();
+            new SendMessage(resp.getUserId()).message("Не удалось добавить снаряжение").saveExecute();
             LOG.error("Failed add photo", e);
         }
         resp.setArgs("");

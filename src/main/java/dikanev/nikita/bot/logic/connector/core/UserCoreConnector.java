@@ -8,6 +8,7 @@ import dikanev.nikita.bot.api.objects.*;
 import dikanev.nikita.bot.controller.core.CoreController;
 import dikanev.nikita.bot.controller.objects.ObjectsController;
 import dikanev.nikita.bot.service.client.parameter.HttpGetParameter;
+import dikanev.nikita.bot.service.client.parameter.JsonParameter;
 import dikanev.nikita.bot.service.storage.clients.CoreClientStorage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -258,5 +259,27 @@ public class UserCoreConnector {
         ObjectsController.ifExceptionThrow(req);
 
         return req.cast(MessageObject.empty()).getMessage().toLowerCase().equals("ok");
+    }
+
+    public static Map<String, Boolean> getAccessesCommand(String token, int userId, List<String> commandsName) throws ApiException {
+        if (commandsName == null || commandsName.isEmpty()) {
+            throw new IllegalStateException("Commands is empty");
+        }
+
+        JObject req = CoreController.execute("user.access", new HttpGetParameter()
+                .add("token", token)
+                .add("userId", String.valueOf(userId))
+                .set("cmd", commandsName));
+        ObjectsController.ifExceptionThrow(req);
+
+        JsonArray jsCommands = req.getObj().getAsJsonObject("object").getAsJsonArray("accesses");
+        Map<String, Boolean> commandsMap = new HashMap<>(jsCommands.size());
+        jsCommands.forEach(it -> {
+            JsonObject jsCommand = it.getAsJsonObject();
+            commandsMap.put(jsCommand.getAsJsonPrimitive("command").getAsString()
+                    , jsCommand.getAsJsonPrimitive("access").getAsBoolean());
+        });
+
+        return commandsMap;
     }
 }

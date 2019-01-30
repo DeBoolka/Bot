@@ -7,11 +7,13 @@ import org.checkerframework.checker.nullness.compatqual.NonNullType;
 
 public class CommandResponse {
 
-    private int idUser;
+    private int userId;
 
     private int idCommand;
 
     private Parameter args;
+
+    private JsonObject state;
 
     private Message message;
 
@@ -24,8 +26,8 @@ public class CommandResponse {
 
     private boolean isHandle = true;
 
-    public CommandResponse(int idUser, int idCommand, Parameter args, Message message, JsonObject requestObject) {
-        this.idUser = idUser;
+    public CommandResponse(int userId, int idCommand, Parameter args, Message message, JsonObject requestObject) {
+        this.userId = userId;
         this.idCommand = idCommand;
         this.message = message;
         this.requestObject = requestObject;
@@ -109,12 +111,12 @@ public class CommandResponse {
         return this;
     }
 
-    public int getIdUser() {
-        return idUser;
+    public int getUserId() {
+        return userId;
     }
 
-    public CommandResponse setIdUser(int idUser) {
-        this.idUser = idUser;
+    public CommandResponse setUserId(int userId) {
+        this.userId = userId;
         return this;
     }
 
@@ -129,5 +131,13 @@ public class CommandResponse {
 
     public JsonObject getRequestObject() {
         return requestObject;
+    }
+
+    public JsonObject getState() {
+        return state;
+    }
+
+    public void setState(JsonObject state) {
+        this.state = state;
     }
 }

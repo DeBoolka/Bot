@@ -44,7 +44,7 @@ public class PersonMenuCommand extends MenuCommand {
         }));
         res.put("bot/vk/person/info/update", new CommandData("Изменить", "- Заполнение или изменение информации о себе", true, (resp, data, commands) -> {
             addWorker(args, "change-info", "change-info");
-            new SendMessage(resp.getIdUser()).message("Выберите цифру информации, которую хотите редактировать\n" + getNamesOfPublicDataOfUser()).execute();
+            new SendMessage(resp.getUserId()).message("Выберите цифру информации, которую хотите редактировать\n" + getNamesOfPublicDataOfUser()).execute();
             return cmdResp.finish();
         }));
         res.put("bot/vk/person/photo", new CommandData("Фото", "- Ваши фотографии", true, (resp, data, commands) ->
@@ -67,7 +67,7 @@ public class PersonMenuCommand extends MenuCommand {
 
     private String getPersonInfo(CommandResponse cmdResp, Parameter args) throws ClientException, ApiException, SQLException, dikanev.nikita.bot.api.exceptions.ApiException {
         JObject userData = UserController.getPersonalDataOfUser(CoreClientStorage.getInstance().getToken()
-                , cmdResp.getIdUser()
+                , cmdResp.getUserId()
                 , "userId", "name", "s_name", "login", "email", "age", "phone", "city", "nameOnGame");
         if (userData == null) {
             return "Команда временно недоступна.";
@@ -115,11 +115,11 @@ public class PersonMenuCommand extends MenuCommand {
                     for (int i = 0; i < publicDataOfUser.length; i += COUNT_COLUMN_PUBLIC_DATA_OF_USER) {
                         if (i / COUNT_COLUMN_PUBLIC_DATA_OF_USER + 1 == indexChangedDate) {
                             param.set("change-data", publicDataOfUser[i + 1]);
-                            new SendMessage(resp.getIdUser()).message("Введите новые данные").execute();
+                            new SendMessage(resp.getUserId()).message("Введите новые данные").execute();
                             return;
                         }
                     }
-                    new SendMessage(resp.getIdUser()).message("Не верный индекс").execute();
+                    new SendMessage(resp.getUserId()).message("Не верный индекс").execute();
                     resp.setArgs("");
                     return;
                 }
@@ -128,20 +128,20 @@ public class PersonMenuCommand extends MenuCommand {
                     return;
                 }
                 boolean isUpdate = UserController.updateUserInfo(CoreClientStorage.getInstance().getToken()
-                        , resp.getIdUser()
+                        , resp.getUserId()
                         , param.getF("change-data")
                         , text.trim()
                 );
 
-                new SendMessage(resp.getIdUser()).message(isUpdate ? "Информация успешно сохранена" : "Команда временно недоступна").execute();
+                new SendMessage(resp.getUserId()).message(isUpdate ? "Информация успешно сохранена" : "Команда временно недоступна").execute();
                 resp.setArgs("");
                 return;
             } catch (NumberFormatException e) {
-                new SendMessage(resp.getIdUser()).message("Не корректный индекс.").execute();
+                new SendMessage(resp.getUserId()).message("Не корректный индекс.").execute();
             }
         } catch (InvalidParametersException e) {
             try {
-                new SendMessage(resp.getIdUser()).message("Не верный индекс или формат нового значения").execute();
+                new SendMessage(resp.getUserId()).message("Не верный индекс или формат нового значения").execute();
             } catch (Exception ex) {
                 LOG.error("Fatal error: ", ex);
             }

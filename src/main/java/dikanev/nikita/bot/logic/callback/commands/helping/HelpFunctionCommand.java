@@ -64,7 +64,7 @@ public class HelpFunctionCommand extends VkCommand {
         if (helpVal.equals("null")) {
             String ask = args.getFOrDefault("helpAsk", "null");
             Keyboard buttons = new Keyboard(false).prim("Да").prim("Нет");
-            new SendMessage(cmdResp.getIdUser()).message(ask).button(buttons).execute();
+            new SendMessage(cmdResp.getUserId()).message(ask).button(buttons).execute();
 
             args.remove("helpAsk");
             return cmdResp.finish();
