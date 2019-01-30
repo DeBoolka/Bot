@@ -16,14 +16,15 @@ public class CommandDBConnector {
     private static final Logger LOG = LoggerFactory.getLogger(CommandDBConnector.class);
 
     //Создание команды
-    public static int createCurrentCommand(int idUser, String args, int idCommand) throws SQLException {
+    public static int createCurrentCommand(int idUser, String args, String state, int idCommand) throws SQLException {
         SQLRequest req = new SQLRequest(DBStorage.getInstance().getConnection())
-                .build("INSERT graph(id_user, args, id_command) VALUES (?, ?, ?)")
+                .build("INSERT graph(id_user, args, id_command, state) VALUES (?, ?, ?, ?)")
                 .set(
                         p -> p.setInt(1, idUser),
                         p -> p.setString(2, args),
-                        p -> p.setInt(3, idCommand)
-                );
+                        p -> p.setInt(3, idCommand),
+                        p -> p.setString(4, state)
+                        );
         int res = req.executeUpdate();
         req.close();
 
@@ -38,7 +39,7 @@ public class CommandDBConnector {
     //Получение текущей позиции на графе
     public static Map<String, Object> getCurrentCommand(int userId) throws SQLException, NotFoundException {
         ResultSet res = new SQLRequest(DBStorage.getInstance().getConnection())
-                .build("SELECT id_command, args " +
+                .build("SELECT id_command, args, state " +
                         "FROM graph " +
                         "WHERE id_user = ? " +
                         "LIMIT 1")
@@ -47,9 +48,11 @@ public class CommandDBConnector {
 
         int id = -1;
         String args = null;
+        String state = null;
         while (res.next()) {
             id = res.getInt("id_command");
             args = res.getString("args");
+            state = res.getString("state");
         }
 
         res.close();
@@ -57,7 +60,7 @@ public class CommandDBConnector {
             throw new NotFoundException("User not found");
         }
 
-        return new HashMap<>(Map.of("id_command", id, "args", args));
+        return new HashMap<>(Map.of("id_command", id, "args", args, "state", state));
     }
 
     //Устанавливает текущие аргументы
@@ -75,30 +78,31 @@ public class CommandDBConnector {
         req.close();
 
         if (res == 0) {
-            createCurrentCommand(userId, args, 0);
+            createCurrentCommand(userId, args, "{}", 0);
         }
 
         return true;
     }
 
     //Устанавливает текущую команду
-    public static boolean setCurrentCommand(int idUser, String args, int idCommand) throws SQLException {
+    public static boolean setCurrentCommand(int idUser, String args, String state, int idCommand) throws SQLException {
         SQLRequest req = new SQLRequest(DBStorage.getInstance().getConnection())
                 .build("UPDATE graph " +
-                        "SET args = ?, id_command = ? " +
+                        "SET args = ?, id_command = ?, state = ? " +
                         "WHERE id_user = ? " +
                         "LIMIT 1")
                 .set(
                         p -> p.setString(1, args),
                         p -> p.setInt(2, idCommand),
-                        p -> p.setInt(3, idUser)
-                );
+                        p -> p.setString(3, state),
+                        p -> p.setInt(4, idUser)
+                        );
 
         int res = req.executeUpdate();
         req.close();
 
         if (res == 0) {
-            createCurrentCommand(idUser, args, idCommand);
+            createCurrentCommand(idUser, args, state, idCommand);
         }
 
         return true;

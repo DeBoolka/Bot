@@ -47,6 +47,6 @@ class PhotoMenuCommandTest {
 
         Field field = clazz.getDeclaredField("ourInstance");
         field.setAccessible(true);
-        field.set(CommandController.getInstance(), mockCommandController);
+        field.set(CommandController.class, mockCommandController);
     }
 }

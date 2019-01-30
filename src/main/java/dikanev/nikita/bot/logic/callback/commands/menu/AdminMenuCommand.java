@@ -28,12 +28,12 @@ public class AdminMenuCommand extends MenuCommand {
         ));
         res.put("bot/vk/invite/create", new CommandData("create invite", "- Создает инвайт код", true, (resp, data, commands) -> {
             addWorker(args, "invite-create", "invite-create");
-            new SendMessage(cmdResp.getIdUser()).message("Введите id группы.").execute();
+            new SendMessage(cmdResp.getUserId()).message("Введите id группы.").execute();
             return cmdResp.finish();
         }));
         res.put("bot/vk/group/update", new CommandData("change group", "- Изменяет группу пользователя", true, (resp, data, commands) -> {
             addWorker(args, "change-group", "change-group");
-            new SendMessage(cmdResp.getIdUser()).message("Введите id пользователя.").execute();
+            new SendMessage(cmdResp.getUserId()).message("Введите id пользователя.").execute();
             return cmdResp.finish();
         }));
         res.put("help", new CommandData("help", true, "- Выводит список команд", Keyboard.DEFAULT, (resp, data, commands) -> {
@@ -64,17 +64,17 @@ public class AdminMenuCommand extends MenuCommand {
         try {
             try {
                 String invite = UserController.createInvite(CoreClientStorage.getInstance().getToken()
-                        , resp.getIdUser()
+                        , resp.getUserId()
                         , Integer.valueOf(text));
                 if (invite != null && !invite.isEmpty()) {
-                    new SendMessage(resp.getIdUser()).message("Инвайт создан: " + invite).execute();
+                    new SendMessage(resp.getUserId()).message("Инвайт создан: " + invite).execute();
                     param.remove("menu-block", "invite-create");
                     param.remove("worker", "invite-create");
                     return;
                 }
-                new SendMessage(resp.getIdUser()).message("Не удалось создать инвайт код.").execute();
+                new SendMessage(resp.getUserId()).message("Не удалось создать инвайт код.").execute();
             } catch (NumberFormatException e) {
-                new SendMessage(resp.getIdUser()).message("Не корректный id.").execute();
+                new SendMessage(resp.getUserId()).message("Не корректный id.").execute();
             }
         } catch (Exception e) {
             LOG.error("Failed create invite code: ", e);
@@ -93,7 +93,7 @@ public class AdminMenuCommand extends MenuCommand {
             try {
                 if (!param.contains("change-userId")) {
                     param.set("change-userId", String.valueOf(Integer.valueOf(text)));
-                    new SendMessage(resp.getIdUser()).message("Введите id группы которую хотите ему присвоить.").execute();
+                    new SendMessage(resp.getUserId()).message("Введите id группы которую хотите ему присвоить.").execute();
                     return;
                 }
 
@@ -101,15 +101,15 @@ public class AdminMenuCommand extends MenuCommand {
                         , param.getIntF("change-userId")
                         , Integer.valueOf(text));
                 if (group != null) {
-                    new SendMessage(resp.getIdUser()).message("Пользователю присвоена группа: " + group.name).execute();
+                    new SendMessage(resp.getUserId()).message("Пользователю присвоена группа: " + group.name).execute();
                     param.remove("menu-block", "change-group");
                     param.remove("worker", "change-group");
                     param.remove("change-userId");
                     return;
                 }
-                new SendMessage(resp.getIdUser()).message("Не удалось создать инвайт код.").execute();
+                new SendMessage(resp.getUserId()).message("Не удалось создать инвайт код.").execute();
             } catch (NumberFormatException e) {
-                new SendMessage(resp.getIdUser()).message("Не корректный id.").execute();
+                new SendMessage(resp.getUserId()).message("Не корректный id.").execute();
             }
         } catch (Exception e) {
             LOG.error("Failed change group: ", e);

@@ -64,7 +64,7 @@ public class MenuCommand extends VkCommandHandler {
         ));
         res.put("bot/vk/invite/apply", new CommandData("Пригласительный", " - Ввод пригласительного", true, Keyboard.POSITIVE, (resp, data, commands) -> {
             addWorker(args, "apply-invite");
-            new SendMessage(cmdResp.getIdUser()).message("Введите ваш инвайт код.").execute();
+            new SendMessage(cmdResp.getUserId()).message("Введите ваш инвайт код.").execute();
             return resp.finish();
         }));
         res.put("help", new CommandData("help",true, "- Выводит список команд", Keyboard.DEFAULT, (resp, data, commands) -> {
@@ -129,7 +129,7 @@ public class MenuCommand extends VkCommandHandler {
             return;
         }
 
-        int userId = resp.getIdUser();
+        int userId = resp.getUserId();
         try {
             try {
                 Group group = UserController.applyInvite(CoreClientStorage.getInstance().getToken(), userId, invite);

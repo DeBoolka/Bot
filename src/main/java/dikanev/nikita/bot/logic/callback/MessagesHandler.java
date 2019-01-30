@@ -21,13 +21,15 @@ public class MessagesHandler {
     public static void parseMessage(Integer groupId, Message message, JsonObject requestObject) {
         try {
             Map<String, Object> currentDataCommand = getCurrentDataCommand(message);
-
             int currentIdCommand = (Integer) currentDataCommand.get("id_command");
             Parameter args = new HttpGetParameter((String) currentDataCommand.get("args"));
-            CommandResponse commandResponse = new CommandResponse(message.getUserId(), currentIdCommand, args, message, requestObject);
-            commandResponse.setText(message.getBody());
+            JsonObject state = (JsonObject) currentDataCommand.get("args");
 
-            handle(commandResponse);
+            CommandResponse resp = new CommandResponse(message.getUserId(), currentIdCommand, args, message, requestObject);
+            resp.setText(message.getBody());
+            resp.setState(state);
+
+            handle(resp);
         } catch (SQLException e) {
             LOG.error("DB error in parseMessage: " + e.getMessage(), e);
         } catch (Exception e) {
@@ -35,41 +37,41 @@ public class MessagesHandler {
         }
     }
 
-    private static void handle(CommandResponse commandResponse) throws Exception {
+    private static void handle(CommandResponse resp) throws Exception {
         //Обработчик текущей команды
-        if (commandResponse.isHandle()) {
-            VkCommand currentCommand = getCommand(commandResponse.getIdCommand());
-            commandResponse = currentCommand.handle(commandResponse, commandResponse.getArgs());
+        if (resp.isHandle()) {
+            VkCommand currentCommand = getCommand(resp.getIdCommand());
+            resp = currentCommand.handle(resp, resp.getArgs());
         }
 
         //Вход в следующую команду
-        if (commandResponse.isInit()) {
-            VkCommand nextCommand = getCommand(commandResponse.getIdCommand());
-            commandResponse = nextCommand.init(commandResponse, commandResponse.getArgs());
+        if (resp.isInit()) {
+            VkCommand nextCommand = getCommand(resp.getIdCommand());
+            resp = nextCommand.init(resp, resp.getArgs());
         }
 
-        if (commandResponse.isTransit()) {
-            handle(commandResponse);
+        if (resp.isTransit()) {
+            handle(resp);
         } else {
-            setCurrentCommand(commandResponse);
+            setCurrentCommand(resp);
         }
     }
 
-    private static void setCurrentCommand(CommandResponse commandResponse) {
+    private static void setCurrentCommand(CommandResponse resp) {
         try {
-            CommandController.getInstance().setCurrentCommand(commandResponse.getIdUser(), commandResponse.getArgs().getContent(), commandResponse.getIdCommand());
+            CommandController.setCurrentCommand(resp.getUserId(), resp.getArgs().getContent(), resp.getState().toString(), resp.getIdCommand());
         } catch (SQLException e) {
             LOG.error("DB error: " + e.getMessage());
         }
     }
 
     private static Map<String, Object> getCurrentDataCommand(Message message) throws Exception{
-        Map<String, Object> currentDataCommand = null;
+        Map<String, Object> currentDataCommand;
         try {
-            currentDataCommand = CommandController.getInstance().getCurrentCommand(message.getUserId());
+            currentDataCommand = CommandController.getCurrentCommand(message.getUserId());
         } catch (NotFoundException e) {
             UserController.createUser(message.getUserId());
-            currentDataCommand = CommandController.getInstance().getCurrentCommand(message.getUserId());
+            currentDataCommand = CommandController.getCurrentCommand(message.getUserId());
         }
 
         return currentDataCommand;

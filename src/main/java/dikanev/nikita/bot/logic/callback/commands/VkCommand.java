@@ -18,17 +18,15 @@ public abstract class VkCommand {
 
     private static final Logger LOG = LoggerFactory.getLogger(VkCommand.class);
 
-    private boolean isOneTime = true;
 
     private Keyboard buttons = null;
 
     public VkCommand() {
-        buttons = setDefaultKeyboardButtons();
     }
 
-    public abstract CommandResponse init(CommandResponse cmdResp, Parameter args) throws Exception;
+    public abstract CommandResponse init(CommandResponse resp, Parameter args) throws Exception;
 
-    public abstract CommandResponse handle(CommandResponse cmdResp, Parameter args) throws Exception;
+    public abstract CommandResponse handle(CommandResponse resp, Parameter args) throws Exception;
 
     protected static boolean isTrue(String message) {
         message = message.trim().toLowerCase();
@@ -47,12 +45,13 @@ public abstract class VkCommand {
         }
     }
 
-    public Keyboard setDefaultKeyboardButtons() {
-        return null;
-    }
-
     public static class SendMessage {
         private MessagesSendQuery message;
+
+        public SendMessage() {
+            message = VkClientStorage.getInstance().vk().messages()
+                    .send(DataStorage.getInstance().getActor());
+        }
 
         public SendMessage(int userId) {
             message = VkClientStorage.getInstance().vk().messages()
