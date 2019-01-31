@@ -15,9 +15,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class WayMenuCommandTest extends VkCommandTest {
 
-    static Gson gson = new Gson();
-    static JsonParser jsParser = new JsonParser();
-
     @Test
     void way1(){
         String reqText = "start";
@@ -31,33 +28,5 @@ class WayMenuCommandTest extends VkCommandTest {
         resp.setText("help");
         assertDoesNotThrow(() -> wayMenuCommand.handle(resp, resp.getArgs()));
         assertEquals("help - информация по командам", getLastVkMessage().toLowerCase());
-    }
-
-    private JsonObject getJsonObject(String text) {
-        String str = getJsonTextMessage(text);
-        return jsParser.parse(str).getAsJsonObject();
-    }
-
-
-    private Message getMessage(String text) {
-        String str = getJsonTextMessage(text);
-        return gson.fromJson(str, Message.class);
-    }
-
-    private String getJsonTextMessage(String text) {
-        return "{\n" +
-                "  \"type\": \"message_new\",\n" +
-                "  \"object\": {\n" +
-                "    \"id\": 5415,\n" +
-                "    \"date\": 1548848837,\n" +
-                "    \"out\": 0,\n" +
-                "    \"user_id\": 147952026,\n" +
-                "    \"read_state\": 0,\n" +
-                "    \"title\": \"\",\n" +
-                "    \"body\": \"" + text + "\",\n" +
-                "    \"payload\": \"{\\\"button\\\":\\\"" + text + "\\\"}\"\n" +
-                "  },\n" +
-                "  \"group_id\": 167918981\n" +
-                "}";
     }
 }

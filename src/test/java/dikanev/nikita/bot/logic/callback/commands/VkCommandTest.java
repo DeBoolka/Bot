@@ -1,5 +1,8 @@
 package dikanev.nikita.bot.logic.callback.commands;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.vk.api.sdk.actions.Messages;
 import com.vk.api.sdk.client.TransportClient;
 import com.vk.api.sdk.client.VkApiClient;
@@ -35,6 +38,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 class VkCommandTest {
+    protected static Gson gson = new Gson();
+    protected static JsonParser jsParser = new JsonParser();
 
     protected static VkClientStorage vkClientStorage = VkClientStorage.getInstance();
 
@@ -94,6 +99,33 @@ class VkCommandTest {
             return null;
         }
         return messagesToVk.get(messagesToVk.size() - 1).trim();
+    }
+
+    protected JsonObject getJsonObject(String text) {
+        String str = getJsonTextMessage(text);
+        return jsParser.parse(str).getAsJsonObject();
+    }
+
+    protected Message getMessage(String text) {
+        String str = getJsonTextMessage(text);
+        return gson.fromJson(str, Message.class);
+    }
+
+    protected String getJsonTextMessage(String text) {
+        return "{\n" +
+                "  \"type\": \"message_new\",\n" +
+                "  \"object\": {\n" +
+                "    \"id\": 5415,\n" +
+                "    \"date\": 1548848837,\n" +
+                "    \"out\": 0,\n" +
+                "    \"user_id\": 147952026,\n" +
+                "    \"read_state\": 0,\n" +
+                "    \"title\": \"\",\n" +
+                "    \"body\": \"" + text + "\",\n" +
+                "    \"payload\": \"{\\\"button\\\":\\\"" + text + "\\\"}\"\n" +
+                "  },\n" +
+                "  \"group_id\": 167918981\n" +
+                "}";
     }
 
     static class MessageSend extends MessagesSendQuery {

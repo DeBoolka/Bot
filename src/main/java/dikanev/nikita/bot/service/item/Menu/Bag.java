@@ -31,9 +31,7 @@ public class Bag {
     public Bag setCurrentPointName(String currentPointName) {
         JsUtils.set(parameter, "currentPointName", currentPointName);
         if (!parameter.has(currentPointName)) {
-            JsonObject jsPointData = new JsonObject();
-            jsPointData.addProperty("isBeen", false);
-            JsUtils.set(parameter, currentPointName, jsPointData);
+            setBeen(currentPointName, false);
         }
         return this;
     }
@@ -55,5 +53,16 @@ public class Bag {
 
     public void setCurrentWayName(String name) {
         JsUtils.set(parameter, "currentWayName", name);
+    }
+
+    public Bag setBeen(String pointName, boolean isBeen) {
+        if (!parameter.has(pointName)) {
+            JsonObject jsPointData = new JsonObject();
+            jsPointData.addProperty("isBeen", false);
+            JsUtils.set(parameter, pointName, jsPointData);
+        } else {
+            JsUtils.set(parameter.getAsJsonObject(pointName), "isBeen", false);
+        }
+        return this;
     }
 }

@@ -7,7 +7,7 @@ import dikanev.nikita.bot.logic.callback.commands.menu.PersonMenuCommand;
 import dikanev.nikita.bot.logic.callback.commands.menu.PhotoMenuCommand;
 
 public enum VkCommands {
-    ENTRY_BOT(new EntryBotCommand()),
+    LOGIN_USER(new LoginBotCommand()),
 
     MENU(new MenuCommand()),
     ADMIN_MENU(new AdminMenuCommand()),
