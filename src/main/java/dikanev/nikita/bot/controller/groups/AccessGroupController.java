@@ -5,6 +5,7 @@ import dikanev.nikita.bot.api.objects.UserObject;
 import dikanev.nikita.bot.controller.users.UserController;
 import dikanev.nikita.bot.logic.connector.core.AccessGroupCoreConnector;
 import dikanev.nikita.bot.logic.connector.core.UserCoreConnector;
+import dikanev.nikita.bot.logic.connector.db.users.UserDBConnector;
 import dikanev.nikita.bot.service.storage.clients.CoreClientStorage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +43,7 @@ public class AccessGroupController {
 
     //Возвращает доступность команд для группы
     public static Map<String, Boolean> getAccessUser(String token, int userId, List<String> commandsName) throws ApiException, SQLException{
-        return UserCoreConnector.getAccessesCommand(token, userId, commandsName);
+        return UserCoreConnector.getAccessesCommand(token, UserDBConnector.getIdCore(userId), commandsName);
     }
 
     //Возвращает доступность команд для группы

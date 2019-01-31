@@ -23,7 +23,7 @@ public class MessagesHandler {
             Map<String, Object> currentDataCommand = getCurrentDataCommand(message);
             int currentIdCommand = (Integer) currentDataCommand.get("id_command");
             Parameter args = new HttpGetParameter((String) currentDataCommand.get("args"));
-            JsonObject state = (JsonObject) currentDataCommand.get("args");
+            JsonObject state = (JsonObject) currentDataCommand.get("state");
 
             CommandResponse resp = new CommandResponse(message.getUserId(), currentIdCommand, args, message, requestObject);
             resp.setText(message.getBody());

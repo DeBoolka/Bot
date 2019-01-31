@@ -5,16 +5,28 @@ import dikanev.nikita.bot.controller.groups.AccessGroupController;
 import dikanev.nikita.bot.logic.callback.CommandResponse;
 import dikanev.nikita.bot.logic.callback.commands.VkCommand;
 import dikanev.nikita.bot.service.storage.clients.CoreClientStorage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
 public class Menu {
+    private static final Logger LOG = LoggerFactory.getLogger(Menu.class);
 
     private String startMessage = "Что хотите сделать?";
+    private WayData defaultWay = null;
     private List<WayData> ways = new ArrayList<>();
 
     public Menu way(WayData wayData) {
         ways.add(wayData);
+        return this;
+    }
+
+    public Menu defaultWay(WayData way) {
+        if (!ways.contains(way)) {
+            ways.add(way);
+        }
+        defaultWay = way;
         return this;
     }
 
@@ -62,6 +74,10 @@ public class Menu {
                 return enterToWay(resp, wayData, bag);
             }
         }
+        if (defaultWay != null) {
+            return enterToWay(resp, defaultWay, bag);
+        }
+
         new VkCommand.SendMessage(resp.getUserId()).message("Команда не найдена").saveExecute();
         return resp.finish();
     }
@@ -148,14 +164,53 @@ public class Menu {
             return this;
         }
 
-        public WayData way(String name, Point.Work in, Point.Work payload) {
-            this.way = new Way(new Point(name, in, payload));
+        //----------------------
+        //Ways
+        //----------------------
+
+        public WayData point(Point point) {
+            if (way == null) {
+                this.way = new Way();
+            }
+            this.way.putPoint(point);
             return this;
         }
 
-        public WayData way(Point.Work in, Point.Work payload) {
-            this.way = new Way(new Point("start", in, payload));
-            return this;
+        public WayData point(String name, Point.Work in, Point.Work payload) {
+            return point(new Point(name, in, payload));
+        }
+
+        public WayData point(Point.Work in, Point.Work payload) {
+            return point("start", in, payload);
+        }
+
+        public WayData point(String name, String inMessage, VkCommand.Keyboard keyboard, Point.Work payload) {
+            return point(new Point(name, getSendMessageWorker(inMessage, keyboard), payload));
+        }
+
+        public WayData point(String name, String inMessage, Point.Work payload) {
+            return point(name, inMessage, null, payload);
+        }
+
+        public WayData point(String inMessage, VkCommand.Keyboard keyboard, Point.Work payload) {
+            return point("start", inMessage, keyboard, payload);
+        }
+
+        public WayData point(String inMessage, Point.Work payload) {
+            return point("start", inMessage, null, payload);
+        }
+
+        //----------------------
+
+        private Point.Work getSendMessageWorker(String inMessage, VkCommand.Keyboard keyboard) {
+            return (resp, param, bag) -> {
+                VkCommand.SendMessage sendMessage = new VkCommand.SendMessage(resp.getUserId()).message(inMessage);
+                if (keyboard != null) {
+                    sendMessage.button(keyboard);
+                }
+                sendMessage.execute();
+                return null;
+            };
         }
 
         public WayData help(String helpMessage) {

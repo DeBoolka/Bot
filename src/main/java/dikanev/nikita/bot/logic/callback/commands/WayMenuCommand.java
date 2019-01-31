@@ -50,7 +50,7 @@ public abstract class WayMenuCommand extends VkCommand {
                 .loadAccess(false)
                 .buttonText("help")
                 .help("Информация по командам")
-                .way(
+                .point(
                         (resp, param, bag) -> {
                             sendHelpMessage(resp);
                             return exitWay(resp);

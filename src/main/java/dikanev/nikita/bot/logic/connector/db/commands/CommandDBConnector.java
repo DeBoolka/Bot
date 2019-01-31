@@ -1,5 +1,9 @@
 package dikanev.nikita.bot.logic.connector.db.commands;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
 import dikanev.nikita.bot.api.exceptions.NotFoundException;
 import dikanev.nikita.bot.service.client.SQLRequest;
 import dikanev.nikita.bot.service.storage.DBStorage;
@@ -14,6 +18,7 @@ import java.util.Map;
 public class CommandDBConnector {
 
     private static final Logger LOG = LoggerFactory.getLogger(CommandDBConnector.class);
+    private final static JsonParser jsParser = new JsonParser();
 
     //Создание команды
     public static int createCurrentCommand(int idUser, String args, String state, int idCommand) throws SQLException {
@@ -60,7 +65,7 @@ public class CommandDBConnector {
             throw new NotFoundException("User not found");
         }
 
-        return new HashMap<>(Map.of("id_command", id, "args", args, "state", state));
+        return new HashMap<>(Map.of("id_command", id, "args", args, "state", state == null ? "" : state));
     }
 
     //Устанавливает текущие аргументы
