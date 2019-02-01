@@ -1,16 +1,14 @@
 package dikanev.nikita.bot.logic.callback;
 
 import dikanev.nikita.bot.logic.callback.commands.*;
-import dikanev.nikita.bot.logic.callback.commands.menu.AdminMenuCommand;
-import dikanev.nikita.bot.logic.callback.commands.menu.AmmunitionMenuCommand;
-import dikanev.nikita.bot.logic.callback.commands.menu.PersonMenuCommand;
-import dikanev.nikita.bot.logic.callback.commands.menu.PhotoMenuCommand;
+import dikanev.nikita.bot.logic.callback.commands.menu.*;
 
 public enum VkCommands {
     LOGIN_USER(new LoginBotCommand()),
 
     MENU(new MenuCommand()),
     ADMIN_MENU(new AdminMenuCommand()),
+    GAME_MENU(new GameMenuCommand()),
 
     PERSONAL_MENU_OF_USER(new PersonMenuCommand()),
     PHOTO_OF_USER(new PhotoMenuCommand()),

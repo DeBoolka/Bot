@@ -37,7 +37,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-class VkCommandTest {
+public class VkCommandTest {
     protected static Gson gson = new Gson();
     protected static JsonParser jsParser = new JsonParser();
 

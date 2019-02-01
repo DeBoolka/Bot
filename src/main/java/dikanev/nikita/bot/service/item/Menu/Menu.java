@@ -79,7 +79,8 @@ public class Menu {
         }
 
         new VkCommand.SendMessage(resp.getUserId()).message("Команда не найдена").saveExecute();
-        return resp.finish();
+        bag.clear();
+        return resp.setInit();
     }
 
     private CommandResponse enterToWay(CommandResponse resp, WayData wayData, Bag bag) throws Exception {
@@ -111,7 +112,7 @@ public class Menu {
     }
 
     public Map<String, String> getHelpMessages(Map<String, Boolean> accesses) {
-        Map<String, String> helpMessages = new HashMap<>(ways.size());
+        Map<String, String> helpMessages = new LinkedHashMap<>(ways.size());
         ways.forEach(it -> {
             Boolean access = accesses.get(it.accessAddress);
             if ((access == null || access) && it.helpMessage != null) {
@@ -145,6 +146,7 @@ public class Menu {
 
         public WayData button(String stringOfButton, String typeButton) {
             button = new Button(stringOfButton, typeButton);
+            stringsToEnter.add(stringOfButton);
             return this;
         }
 

@@ -60,7 +60,7 @@ public abstract class WayMenuCommand extends VkCommand {
     }
 
     protected static Point exitWay(CommandResponse resp) {
-        resp.getState().remove("menu");
+        resp.setArgs("").getState().remove("menu");
         return null;
     }
 
