@@ -28,6 +28,10 @@ public class Point {
         this.payload = payload;
     }
 
+    public Point(String name) {
+        setName(name);
+    }
+
     public void in(Work in) {
         this.in = in;
     }

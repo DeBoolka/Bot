@@ -14,6 +14,8 @@ import com.vk.api.sdk.httpclient.HttpTransportClient;
 import com.vk.api.sdk.objects.messages.Message;
 import com.vk.api.sdk.queries.messages.MessagesSendQuery;
 import dikanev.nikita.bot.Application;
+import dikanev.nikita.bot.logic.callback.CommandResponse;
+import dikanev.nikita.bot.service.client.parameter.HttpGetParameter;
 import dikanev.nikita.bot.service.storage.DBStorage;
 import dikanev.nikita.bot.service.storage.DataStorage;
 import dikanev.nikita.bot.service.storage.ServerStorage;
@@ -37,7 +39,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-class VkCommandTest {
+public class VkCommandTest {
     protected static Gson gson = new Gson();
     protected static JsonParser jsParser = new JsonParser();
 
@@ -95,10 +97,14 @@ class VkCommandTest {
     }
 
     protected String getLastVkMessage() {
-        if (messagesToVk.isEmpty()) {
+        return getVkMessage(0);
+    }
+
+    protected String getVkMessage(int index) {
+        if (messagesToVk.isEmpty() || index < 0) {
             return null;
         }
-        return messagesToVk.get(messagesToVk.size() - 1).trim();
+        return messagesToVk.get(messagesToVk.size() - 1 - index).trim();
     }
 
     protected JsonObject getJsonObject(String text) {
@@ -126,6 +132,13 @@ class VkCommandTest {
                 "  },\n" +
                 "  \"group_id\": 167918981\n" +
                 "}";
+    }
+
+    protected CommandResponse getResp(int idCommand, String text) {
+        CommandResponse resp = new CommandResponse(147952026, idCommand, new HttpGetParameter(), getMessage(text), getJsonObject(text));
+        resp.setText(text);
+        resp.setState(new JsonObject());
+        return resp;
     }
 
     static class MessageSend extends MessagesSendQuery {

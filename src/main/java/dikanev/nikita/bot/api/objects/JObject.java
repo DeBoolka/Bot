@@ -9,9 +9,9 @@ public class JObject {
 
     private static JsonParser parser = new JsonParser();
 
-    private JsonElement element;
-
     private String type;
+
+    private JsonElement element;
 
     public JObject(String type, boolean flag) {
         element = new JsonObject();
@@ -57,5 +57,11 @@ public class JObject {
     public <T extends ApiObject> T cast(@NonNullType T object) {
         object.init(element);
         return object;
+    }
+
+    public boolean isNull() {
+        JsonObject jsObj = getObj();
+        return jsObj.keySet().size() == 0
+                || jsObj.keySet().size() == 1 && jsObj.has("type");
     }
 }

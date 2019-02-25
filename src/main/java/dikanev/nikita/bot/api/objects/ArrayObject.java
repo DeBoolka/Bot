@@ -53,7 +53,7 @@ public class ArrayObject extends ApiObject {
     }
 
     public <T> List<T> toList(Class<T> clazz) {
-        List<T> lst = new ArrayList<>();
+        List<T> lst = new ArrayList<>(objects.size());
         objects.forEach(it -> lst.add(gson.fromJson(it, clazz)));
         return lst;
     }
