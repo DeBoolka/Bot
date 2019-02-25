@@ -4,8 +4,11 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.vk.api.sdk.exceptions.ApiException;
 import com.vk.api.sdk.exceptions.ClientException;
+import dikanev.nikita.bot.api.exceptions.InvalidParametersException;
 import dikanev.nikita.bot.api.item.Game;
+import dikanev.nikita.bot.api.item.GameRole;
 import dikanev.nikita.bot.api.item.Gamer;
+import dikanev.nikita.bot.api.item.RoleForGame;
 import dikanev.nikita.bot.controller.game.GameController;
 import dikanev.nikita.bot.logic.callback.CommandResponse;
 import dikanev.nikita.bot.logic.callback.VkCommands;
@@ -13,11 +16,16 @@ import dikanev.nikita.bot.logic.callback.commands.WayMenuCommand;
 import dikanev.nikita.bot.service.item.Menu.Menu;
 import dikanev.nikita.bot.service.item.Menu.Point;
 import dikanev.nikita.bot.service.storage.clients.CoreClientStorage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Timestamp;
+import java.util.Arrays;
 import java.util.List;
 
 public class GameMenuCommand extends WayMenuCommand {
+    private static final Logger LOG = LoggerFactory.getLogger(GameMenuCommand.class);
+
     private final static int COUNT_GAMES = 5;
     private final static String BACK_BUTTON = "Назад";
     private final static String NEXT_BUTTON = "Вперед";
@@ -47,7 +55,7 @@ public class GameMenuCommand extends WayMenuCommand {
                             resp.setText("");
                             return bag.getWay().getCurrentPoint(bag);
                         },
-                        allGamePoint()
+                        allGamePointWorker()
                 );
     }
 
@@ -63,7 +71,7 @@ public class GameMenuCommand extends WayMenuCommand {
                             resp.setText("");
                             return bag.getWay().getCurrentPoint(bag);
                         },
-                        signedUpGamePoint()
+                        signedUpGamePointWorker()
                 );
 
     }
@@ -75,12 +83,12 @@ public class GameMenuCommand extends WayMenuCommand {
                 .help("Запись на игру.")
                 .point(
                         (resp, param, bag) -> {
-                            new SendMessage(resp.getUserId()).message("Пока недоступно.").execute();
-                            resp.setInit();
-                            return exitWay(resp);
+                            new SendMessage(resp.getUserId()).message("Введите номер игры:").execute();
+                            return null;
                         },
-                        (resp, param, bag) -> null
-                );
+                        indexGamePointWorker()
+                ).point(choiceRolePoint())
+                .point("checkTest", checkTestIn(), null);
     }
 
     private static Menu.WayData getMenuWay() {
@@ -98,7 +106,7 @@ public class GameMenuCommand extends WayMenuCommand {
                 );
     }
 
-    private static Point.Work allGamePoint() {
+    private static Point.Work allGamePointWorker() {
         return (resp, param, bag) -> {
             int indent = param.getIntFOrDefault("indent", 0);
             int count = param.getIntFOrDefault("count", COUNT_GAMES);
@@ -128,7 +136,7 @@ public class GameMenuCommand extends WayMenuCommand {
         };
     }
 
-    private static Point.Work signedUpGamePoint() {
+    private static Point.Work signedUpGamePointWorker() {
         return (resp, param, bag) -> {
             int indent = param.getIntFOrDefault("indent", 0);
             int count = param.getIntFOrDefault("count", COUNT_GAMES);
@@ -143,7 +151,7 @@ public class GameMenuCommand extends WayMenuCommand {
                 return exitWay(resp);
             }
 
-            JsonArray jsGamesAndGamers = GameController.getSignedUpGames(CoreClientStorage.getInstance().getToken(), indent, count);
+            JsonArray jsGamesAndGamers = GameController.getSignedUpGames(CoreClientStorage.getInstance().getToken(), resp.getUserId(), indent, count);
             param.set("hasNext", (jsGamesAndGamers.size() < COUNT_GAMES) ? "false" : "true");
 
             StringBuilder sendText = new StringBuilder();
@@ -163,6 +171,92 @@ public class GameMenuCommand extends WayMenuCommand {
             return sendMessageAndReturnNull(resp, sendText);
         };
 
+    }
+
+    private static Point.Work indexGamePointWorker() {
+        return (resp, param, bag) -> {
+            try {
+                int gameId = Integer.valueOf(resp.getText());
+                String token = CoreClientStorage.getInstance().getToken();
+                Game game = GameController.getGame(token, gameId);
+                if (GameController.isUserSignedUpToGame(token, gameId, resp.getUserId())) {
+                    new SendMessage(resp.getUserId()).message("Вы уже подали заявку на эту игру: " + game.name).execute();
+                    return exitWay(resp.setInit());
+                }
+
+                param.set("gameId", String.valueOf(gameId));
+                return bag.getWay().getPointByName("checkTest");
+            } catch (NumberFormatException e) {
+                new SendMessage(resp.getUserId()).message("Ошибка в номере игры.").execute();
+                return exitWay(resp.setInit());
+            } catch (InvalidParametersException e) {
+                new SendMessage(resp.getUserId()).message("Такой игры не существует").execute();
+                return exitWay(resp.setInit());
+            }
+        };
+    }
+
+    private static Point choiceRolePoint() {
+        return new Point("choiceRole",
+                (resp, param, bag) -> {
+                    int gameId = param.getIntF("gameId");
+                    String token = CoreClientStorage.getInstance().getToken();
+                    RoleForGame[] roles = GameController.getRolesFromTheGame(token, gameId);
+                    if (roles == null || roles.length == 0) {
+                        new SendMessage(resp.getUserId()).message("Нет доступных игровых ролей.").execute();
+                        return exitWay(resp.setInit());
+                    }
+
+                    StringBuilder rolesMessage = new StringBuilder();
+                    Arrays.stream(roles).forEach(role ->
+                            rolesMessage.append(role.role.id).append(". ").append(role.role.name)
+                                    .append(" - ").append(role.numberOfAvailableSeats).append("\n")
+                    );
+                    new SendMessage(resp.getUserId()).message("Выберите номер роли:\n" + rolesMessage.toString()).execute();
+                    return null;
+                },
+                (resp, param, bag) -> {
+                    try {
+                        int roleId = Integer.valueOf(resp.getText());
+                        int gameId = param.getIntF("gameId");
+                        String token = CoreClientStorage.getInstance().getToken();
+                        RoleForGame role;
+                        if ((role = GameController.getRoleFromTheGame(token, gameId, roleId)) == null) {
+                            new SendMessage(resp.getUserId()).message("Такой роли не существует на игре").execute();
+                        } else {
+                            param.set("roleId", String.valueOf(roleId));
+                            registerUserToGame(resp, gameId, roleId);
+                        }
+                    } catch (NumberFormatException e) {
+                        new SendMessage(resp.getUserId()).message("Ошибка в номере роли.").execute();
+                    }
+                    return exitWay(resp.setInit());
+                }
+        );
+    }
+
+    private static void registerUserToGame(CommandResponse resp, int gameId, int roleId) throws ClientException, ApiException {
+        try {
+            String token = CoreClientStorage.getInstance().getToken();
+            Gamer gamer = GameController.registerUserToGame(token, resp.getUserId(), gameId, roleId);
+            new SendMessage(resp.getUserId()).message("Ваша заявка подана и ожидает одобрения администратора игры.").execute();
+        } catch (Exception e) {
+            LOG.error("Fatal error in registration user to game. Data:{userId: " + resp.getUserId()
+                    + ", gameId: " + gameId + ", roleId: " + roleId + "}", e);
+            new SendMessage(resp.getUserId()).message("Ошибка в регистрации на игру").execute();
+        }
+    }
+
+    private static Point.Work checkTestIn() {
+        return (resp, param, bag) -> {
+            int gameId = param.getIntF("gameId");
+            String token = CoreClientStorage.getInstance().getToken();
+            if (!GameController.isUserPassedTheTestOfGame(token, resp.getUserId(), gameId)) {
+                new SendMessage(resp.getUserId()).message("Вы не прошли тест на знание правил игры.").execute();
+                return exitWay(resp.setInit());
+            }
+            return bag.getWay().getPointByName("choiceRole");
+        };
     }
 
     private static Game getGameFromJsonObject(JsonObject game) {
@@ -189,5 +283,4 @@ public class GameMenuCommand extends WayMenuCommand {
         new SendMessage(resp.getUserId()).message(sendText.toString()).button(keyboard).execute();
         return null;
     }
-
 }

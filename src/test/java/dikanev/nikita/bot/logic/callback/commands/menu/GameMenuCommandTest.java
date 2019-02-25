@@ -87,4 +87,32 @@ class GameMenuCommandTest extends VkCommandTest {
         assertDoesNotThrow(() -> wayMenuCommand.handle(resp, resp.getArgs()));
         assertTrue(resp.isInit());
     }
+
+    @Test
+    void registerUserToGame(){
+        String reqText = "Записаться";
+        CommandResponse resp = getResp(10, reqText);
+
+        WayMenuCommand wayMenuCommand = new GameMenuCommand();
+        assertDoesNotThrow(() -> wayMenuCommand.init(resp, resp.getArgs()));
+        assertEquals("что хотите сделать?", getLastVkMessage().toLowerCase());
+
+        resp.setText("Записаться");
+        assertDoesNotThrow(() -> wayMenuCommand.handle(resp, resp.getArgs()));
+        assertEquals("введите номер игры:", getLastVkMessage().toLowerCase());
+
+        resp.setText("1");
+        assertDoesNotThrow(() -> wayMenuCommand.handle(resp, resp.getArgs()));
+        assertEquals("выберите номер роли:\n" +
+                "1. одиночка - 50\n" +
+                "2. долг - 20\n" +
+                "4. монолит - 10", getLastVkMessage().toLowerCase());
+
+        resp.setText("4");
+        assertDoesNotThrow(() -> wayMenuCommand.handle(resp, resp.getArgs()));
+        assertEquals("выберите номер роли:\n" +
+                "1. одиночка - 50\n" +
+                "2. долг - 20\n" +
+                "4. монолит - 10", getLastVkMessage().toLowerCase());
+    }
 }
