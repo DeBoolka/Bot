@@ -47,7 +47,6 @@ public class PhotoVk {
     }
 
     public String getConcatId(){
-        //todo: сделать
         return (ownerId < 0 ? "-" : "") + ownerId + "_" + id + (accessKey != null ? "_" + accessKey : "");
     }
 

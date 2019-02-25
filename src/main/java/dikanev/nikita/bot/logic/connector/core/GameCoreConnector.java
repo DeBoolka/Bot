@@ -79,7 +79,6 @@ public class GameCoreConnector {
                 .add("roleId", String.valueOf(roleId)));
         ObjectsController.ifExceptionThrow(req);
 
-        //todo: кажется тут может быть NullPointerException, надо проверить
         return req.isNull() ? null : gson.fromJson(SimpleObject.getSimpleJsonObject(req), RoleForGame.class);
     }
 
