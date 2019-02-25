@@ -1,53 +1,68 @@
 package dikanev.nikita.bot.api.objects;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+
 public class UserObject extends ApiObject {
 
-    private int id;
+    private int id = 0;
 
-    private int idGroup;
+    private int idGroup = 0;
 
-    private String sName;
+    private String s_name = null;
 
-    private String name;
+    private String name = null;
 
-    public UserObject(int id, int idGroup, String sName, String name) {
+    private UserObject() {
+        super("user");
+    }
+
+    public UserObject(int id, int idGroup, String s_name, String name) {
         super("user");
 
         this.id = id;
         this.idGroup = idGroup;
-        this.sName = sName;
+        this.s_name = s_name;
         this.name = name;
+    }
+
+    public static UserObject empty() {
+        return new UserObject();
     }
 
     public int getId() {
         return id;
     }
 
-    public void setId(int id) {
-        this.id = id;
-    }
-
     public int getIdGroup() {
         return idGroup;
     }
 
-    public void setIdGroup(int idGroup) {
-        this.idGroup = idGroup;
+    public String getS_name() {
+        return s_name;
     }
 
-    public String getsName() {
-        return sName;
-    }
-
-    public void setsName(String sName) {
-        this.sName = sName;
-    }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    @Override
+    public void init(JsonElement js) {
+        if (js.isJsonObject()) {
+            JsonObject root = js.getAsJsonObject();
+            if (root.has("id")) {
+                id = root.get("id").getAsInt();
+            }
+            if (root.has("idGroup")) {
+                idGroup = root.get("idGroup").getAsInt();
+            }
+            if (root.has("s_name")) {
+                s_name = root.get("s_name").getAsString();
+            }
+            if (root.has("name")) {
+                name = root.get("name").getAsString();
+            }
+        }
     }
 }

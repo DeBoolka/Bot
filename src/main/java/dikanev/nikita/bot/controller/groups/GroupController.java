@@ -1,6 +1,6 @@
 package dikanev.nikita.bot.controller.groups;
 
-import dikanev.nikita.bot.controller.db.groups.GroupDBController;
+import dikanev.nikita.bot.logic.connector.db.groups.GroupDBConnector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,21 +21,16 @@ public class GroupController {
 
     //Создание группы
     public int createGroup(String name) throws SQLException {
-        return GroupDBController.getInstance().createGroup(name);
-    }
-
-    //Создание группы
-    public int createGroup(String name, int id) throws SQLException {
-        return GroupDBController.getInstance().createGroup(name, id);
+        return GroupDBConnector.createGroup(name);
     }
 
     //Удаление группы
     public boolean deleteGroup(int idGroup) throws SQLException {
-        return GroupDBController.getInstance().deleteGroup(idGroup);
+        return GroupDBConnector.deleteGroup(idGroup);
     }
 
     //Получение имени группы
     public String getName(int idGroup) throws SQLException {
-        return GroupDBController.getInstance().getName(idGroup);
+        return GroupDBConnector.getName(idGroup);
     }
 }

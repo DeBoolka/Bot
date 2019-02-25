@@ -1,9 +1,6 @@
 package dikanev.nikita.bot.api.exceptions;
 
 
-import dikanev.nikita.bot.api.objects.ApiObject;
-import dikanev.nikita.bot.api.objects.ExceptionObject;
-
 public class ApiException extends Exception {
 
     private String description;
@@ -11,6 +8,8 @@ public class ApiException extends Exception {
     private String message;
 
     private Integer code;
+
+    public int serverCode = -1;
 
     public ApiException(Integer code, String description, String message) {
         this.description = description;
@@ -20,6 +19,11 @@ public class ApiException extends Exception {
 
     public ApiException(Integer code, String message) {
         this(code, "Unknown", message);
+    }
+
+    public ApiException(int code, String description, String message, int serverCode) {
+        this(code, description, message);
+        this.serverCode = serverCode;
     }
 
     public String getDescription() {

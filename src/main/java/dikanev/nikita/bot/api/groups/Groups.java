@@ -7,6 +7,9 @@ public enum Groups {
     USER("user", 4),
     TESTER("tester", 5);
 
+    public static final int DEFAULT_USER_ID = 2;
+    public static final int DEFAULT_GROUP = 3;
+
     private String name;
 
     private int id;
